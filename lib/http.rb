@@ -2,11 +2,11 @@ require './lib/diag'
 require 'socket'
 
 class Http
-  attr_accessor :d
 
-  def initialize
-    @d = Diag.new
-  end
+  #
+  # def d
+  #   Diag.new
+  # end
 
   tcp_server = TCPServer.new(9292)
   client = tcp_server.accept
@@ -23,12 +23,17 @@ class Http
   puts request_lines.inspect
 
   puts "Sending response"
-  binding.pry
+  # binding.pry
   response = "<pre>" + request_lines.join("\n") + "</pre>"
-  body = "<pre>\n" + "#{d.output_message_verb(request_lines)}" + "Path: / \n" "Protocol: HTTP/1.1\n"+
-    "#{request_lines[1]}\n"+ "Port: 9292\n" + "Origin: 127.0.0.1\n" +
-    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-    + "</pre>"
+  body = "<pre>\n" +
+      Diag.new.output_message_verb(request_lines) +
+      Diag.new.output_message_path(request_lines) +
+      Diag.new.output_message_protocol(request_lines) +
+      Diag.new.output_message_host(request_lines) +
+      Diag.new.output_message_port(request_lines) +
+      Diag.new.output_message_origin(request_lines) +
+      Diag.new.output_message_accept(request_lines) +
+      "</pre>"
   output = "<html><head></head><body>#{response}</body></html>"
   headers = ["http/1.1 200 ok",
             "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
