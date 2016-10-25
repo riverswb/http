@@ -16,12 +16,12 @@ class Http
     request_lines = []
     request_count = 0
     while line = client.gets and !line.chomp.empty?
-      request_count += 1
       request_lines << line.chomp
     end
     # get_request(client, tcp_server, request_lines, request_count)
     puts "Got this request:"
     puts request_lines.inspect
+    request_count += 1
     response(request_lines, request_count, tcp_server, client)
   end
 
@@ -36,7 +36,6 @@ class Http
   # end
 
   def response(input, request_count, tcp_server, client)
-    # binding.pry
     puts "Sending response"
     response = "<pre>" + input.join("\n") + "</pre>"
     output = "<html><head></head><body>#{response}</body></html>"
@@ -47,10 +46,11 @@ class Http
               "content-length: #{output.length}\r\n\r\n"].join("\r\n")
     client.puts headers
     client.puts output
-    choose_path(input, request_count)
-    client.close
-    puts "\nResponde complete, exiting."
-    puts ["Outputting Diagnostics:", body(input)]
+    # binding.pry
+    p choose_path(input, request_count, client)
+    # client.close
+    # puts "\nResponde complete, exiting."
+    # puts ["Outputting Diagnostics:", body(input)]
   end
 
   def body(input)
@@ -69,7 +69,7 @@ class Http
     diagnostics.output_message_path(input)
   end
 
-  def choose_path(input, request_count)
+  def choose_path(input, request_count, client)
     # binding.pry
     hello_requests = 0
     if path(input) == "Path: /\n"
@@ -81,6 +81,11 @@ class Http
       Time.now.strftime('%I:%M%p on %A, %B %e, %Y')
     elsif path(input) == "Path: /shutdown\n"
       p "Total Requests: #{request_count}"
+      client.close
     end
   end
+end
+
+if __FILE__ == $0
+  Http.new.request
 end
