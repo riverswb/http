@@ -1,4 +1,4 @@
-class Diag
+class Diagnostics
 
   def output_message_verb(input)
     "VERB: #{input[0].split("/")[0].rstrip}\n"

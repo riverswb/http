@@ -10,7 +10,7 @@ class HttpTest < Minitest::Test
   end
 
   def test_request_response
-    assert Http.new.request_response
+    assert Http.new.request
   end
 
 end
