@@ -36,6 +36,7 @@ class Http
   # end
 
   def response(input, request_count, tcp_server, client)
+    # binding.pry
     puts "Sending response"
     response = "<pre>" + input.join("\n") + "</pre>"
     output = "<html><head></head><body>#{response}</body></html>"
@@ -46,8 +47,7 @@ class Http
               "content-length: #{output.length}\r\n\r\n"].join("\r\n")
     client.puts headers
     client.puts output
-    puts "Hello World! (#{request_count})"
-    puts ["Wrote this response:", headers, output].join("\n")
+    choose_path(input, request_count)
     client.close
     puts "\nResponde complete, exiting."
     puts ["Outputting Diagnostics:", body(input)]
@@ -69,15 +69,18 @@ class Http
     diagnostics.output_message_path(input)
   end
 
-  def iteration_2(input)
-    if path(input) == "/"
+  def choose_path(input, request_count)
+    # binding.pry
+    hello_requests = 0
+    if path(input) == "Path: /\n"
       body(input)
-    elsif path(input) == "/hello"
-      "Hello World! #{request_count}"
-    elsif path(input) == "/datetime"
+    elsif path(input) == "Path: /hello\n"
+      hello_requests += 1
+      "Hello World! #{hello_requests}"
+    elsif path(input) == "Path: /datetime\n"
       Time.now.strftime('%I:%M%p on %A, %B %e, %Y')
-    elsif path(input) == "/shutdown"
-      "Total Requests: #{request_count}"
+    elsif path(input) == "Path: /shutdown\n"
+      p "Total Requests: #{request_count}"
     end
   end
 end
