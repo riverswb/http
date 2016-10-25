@@ -64,4 +64,20 @@ class Http
       diagnostics.output_message_accept(input) +
     "</pre>"
   end
+
+  def path(input)
+    diagnostics.output_message_path(input)
+  end
+
+  def iteration_2(input)
+    if path(input) == "/"
+      body(input)
+    elsif path(input) == "/hello"
+      "Hello World! #{request_count}"
+    elsif path(input) == "/datetime"
+      Time.now.strftime('%I:%M%p on %A, %B %e, %Y')
+    elsif path(input) == "/shutdown"
+      "Total Requests: #{request_count}"
+    end
+  end
 end
