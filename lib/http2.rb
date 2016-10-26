@@ -28,7 +28,7 @@ class Http
   end
 
   def response(client)
-    client.puts choose_path
+    client.puts choose_path(request_lines)
   end
 
   def diagnostics_message
@@ -47,7 +47,7 @@ class Http
     diagnostics.output_message_path(request_lines)
   end
 
-  def choose_path
+  def choose_path(request_lines)
     if path(request_lines) == "Path: /\n"
       diagnostics_message
     elsif path(request_lines) == "Path: /hello\n"
@@ -58,10 +58,19 @@ class Http
     elsif path(request_lines) == "Path: /shutdown\n"
       p "Total Requests: #{request_count}"
       client.close
+    elsif path(request_lines) == "Path: /word_search\n"
+      word_is_in_dictionary(word)
     end
   end
 
-
+  def word_is_in_dictionary(word)
+    dictionary = File.read("/usr/share/dict/words")
+    if dictionary.include?(word)
+      "#{word.upcase} is a known word"
+    else
+      "#{word.upcase} is not a known word"
+    end
+  end
 
 
 end
