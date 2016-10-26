@@ -47,7 +47,7 @@ class Http
     client.puts headers
     client.puts output
     # binding.pry
-    p choose_path(input, request_count, client)
+    client.puts choose_path(input, request_count, client)
     # client.close
     # puts "\nResponde complete, exiting."
     # puts ["Outputting Diagnostics:", body(input)]
