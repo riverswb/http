@@ -1,17 +1,34 @@
 require 'minitest/autorun'
 require 'minitest/emoji'
 require 'faraday'
-require './lib/http'
+require './lib/http2'
 require 'pry'
 
 class HttpTest < Minitest::Test
-
-  def test_server_status_is_200
-    response = Faraday.get("http://127.0.0.1:9292/")
-
-    assert_equal 200, response.status
+  attr_reader :http
+  def setup
+    @http = Http.new
   end
 
+  # def test_server_status_is_200
+  #   response = Faraday.get("http://127.0.0.1:9292/")
+  #
+  #   assert_equal 200, response.status
+  # end
+
+  def test_word_in_dictionary
+    # http = Http.new
+
+    word = "cat"
+    assert_equal "#{word.upcase} is a known word", http.word_is_in_dictionary(word)
+  end
+
+  def test_not_everything_is_in_dictionary
+    # http = Http.new
+    word = "clearlynotaword"
+
+    assert_equal "#{word.upcase} is not a known word", http.word_is_in_dictionary(word)
+  end
 
   # def test_server_prints_hello_world
   #
