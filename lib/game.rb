@@ -29,4 +29,9 @@ class Game
       "That is correct"
     end
   end
+
+  def start_game
+    number_generator
+    puts "Good Luck"
+  end
 end

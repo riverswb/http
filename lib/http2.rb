@@ -1,24 +1,36 @@
 require 'socket'
 require './lib/diagnostics'
+require './lib/game'
+require 'pry'
 
 class Http
-  attr_reader :request_count, :tcp_server, :diagnostics, :request_lines, :hello_requests
+  attr_reader :request_count,
+              :tcp_server,
+              :diagnostics,
+              :request_lines,
+              :hello_requests,
+              :game,
+              :client
   def initialize
     @diagnostics = Diagnostics.new
+    @game = Game.new
+    @tcp_server = tcp_server
     @request_count = 0
     @hello_requests = 0
-    @tcp_server = TCPServer.new(9292)
     @request_lines = []
+    @client = client
   end
 
   def request
-    loop do
+    loop {
+      @tcp_server = TCPServer.new(9292)
       client = tcp_server.accept
       get_request(client)
       @request_count += 1
+      game_check(request_lines)
       response(client)
       client.close
-    end
+    }
   end
 
   def get_request(client)
@@ -28,37 +40,40 @@ class Http
   end
 
   def response(client)
-    client.puts choose_path(request_lines)
+    response = choose_path(request_lines)
+    output = "<html><head></head><body>#{response}</body></html>"
+    headers = ["http/1.1 200 ok",
+          "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+          "server: ruby",
+          "content-type: text/html; charset=iso-8859-1",
+          "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+    client.puts headers
+    client.puts output
   end
 
-  def diagnostics_message
-    "<pre>\n" +
-      diagnostics.output_message_verb(request_lines) +
-      diagnostics.output_message_path(request_lines) +
-      diagnostics.output_message_protocol(request_lines) +
-      diagnostics.output_message_host(request_lines) +
-      diagnostics.output_message_port(request_lines) +
-      diagnostics.output_message_origin(request_lines) +
-      diagnostics.output_message_accept(request_lines) +
-    "</pre>"
-  end
 
   def path(request_lines)
     diagnostics.output_message_path(request_lines)
   end
 
+  def verb(request_lines)
+    diagnostics.output_message_verb(request_lines)
+  end
+
   def choose_path(request_lines)
+    # binding.pry
     if path(request_lines) == "Path: /\n"
-      diagnostics_message
+      diagnostics.full_output_message(request_lines)
     elsif path(request_lines) == "Path: /hello\n"
       @hello_requests += 1
-      "Hello World! #{hello_requests}"
+      "Hello World! (#{hello_requests})"
     elsif path(request_lines) == "Path: /datetime\n"
       Time.now.strftime('%I:%M%p on %A, %B %e, %Y')
     elsif path(request_lines) == "Path: /shutdown\n"
       p "Total Requests: #{request_count}"
-      client.close
-    elsif path(request_lines) == "Path: /word_search\n"
+      tcp_server.accept.close
+    elsif path(request_lines).include?("word_search")
+      word = path(request_lines).split("=")[1]
       word_is_in_dictionary(word)
     end
   end
@@ -69,6 +84,18 @@ class Http
       "#{word.upcase} is a known word"
     else
       "#{word.upcase} is not a known word"
+    end
+  end
+
+  def game_check(request_lines)
+    # binding.pry
+    if verb(request_lines) == "VERB: POST\n" && path(request_lines) == "Path: /startgame\n"
+      game.start_game
+      # client.puts "Good Luck"
+    elsif verb(request_lines) == "VERB: GET\n" && path(request_lines)== "Path: /game\n"
+      # binding.pry
+      # client.puts "Last guess was #{game.last_guess}"
+      # client.puts game.feedback
     end
   end
 

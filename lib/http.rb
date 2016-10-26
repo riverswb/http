@@ -25,16 +25,6 @@ class Http
     response(request_lines, request_count, tcp_server, client)
   end
 
-  # def get_request(client, tcp_server) # This could/ would work if request_count
-  #   request_lines = []                 # and lines were ivars
-  #   request_count = 0
-  #   while line = client.gets and !line.chomp.empty?
-  #     request_count += 1
-  #     request_lines << line.chomp
-  #   end
-  #   return request_lines && request_count
-  # end
-
   def response(input, request_count, tcp_server, client)
     puts "Sending response"
     response = "<pre>" + input.join("\n") + "</pre>"
