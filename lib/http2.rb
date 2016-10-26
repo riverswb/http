@@ -1,8 +1,10 @@
 require 'socket'
+require './lib/diagnostics'
 
 class Http
-  attr_reader :request_count, :tcp_server
+  attr_reader :request_count, :tcp_server, :diagnostics
   def initialize
+    @diagnostics = Diagnostics.new
     @request_count = 0
     @tcp_server = TCPServer.new(9292)
     @request_lines = []
@@ -25,9 +27,22 @@ class Http
   end
 
   def response(client)
-    client.puts "Hello World! (#{request_count})"
+    # binding.pry
+    # client.puts "Hello World! (#{request_count})"
+    client.puts diagnostics_message
   end
 
+  def diagnostics_message
+    "<pre>\n" +
+      diagnostics.output_message_verb(@request_lines) +
+      diagnostics.output_message_path(@request_lines) +
+      diagnostics.output_message_protocol(@request_lines) +
+      diagnostics.output_message_host(@request_lines) +
+      diagnostics.output_message_port(@request_lines) +
+      diagnostics.output_message_origin(@request_lines) +
+      diagnostics.output_message_accept(@request_lines) +
+    "</pre>"
+  end
 
 
 
