@@ -4,6 +4,10 @@ class Diagnostics
     "VERB: #{input[0].split("/")[0].rstrip}\n"
   end #=> Verb: GET
 
+  def output_message_path(input)
+    "Path: #{input[0].split(" ")[1]}\n"
+  end #=> Path: /
+
   def output_message_protocol(input)
     "Protocol: #{input[0].split(" ")[-1]}\n"
   end #=> Protocol: HTTP/1.1
@@ -23,9 +27,5 @@ class Diagnostics
   def output_message_accept(input)
     "#{input[6]}\n"
   end #=> Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-
-  def output_message_path(input)
-    "Path: /\n"
-  end #=> Path: /
 
 end
