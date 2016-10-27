@@ -31,6 +31,7 @@ class Game
   end
 
   def start_game
+    binding.pry
     number_generator
     "Good Luck"
   end

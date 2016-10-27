@@ -1,5 +1,6 @@
 require './lib/diagnostics'
 require './lib/game'
+require './lib/dictionary'
 
 class Http
   attr_reader :request_count,
@@ -19,7 +20,7 @@ class Http
   def response(client, request_lines)
     @request_count += 1
     response = choose_path(request_lines)
-    output = "<html><head></head><body>#{response}</body></html>"
+    output = "<html><body>#{response}</body></html>"
     headers = ["http/1.1 200 ok",
           "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
           "server: ruby",
@@ -53,23 +54,13 @@ class Http
       dictionary.word_is_in_dictionary(word)
     elsif path(request_lines).include?("game")
       game_check(request_lines)
+    else "I'm sorry, try again"
     end
-
-
-
   end
-
-  # def word_is_in_dictionary(word)
-  #   dictionary = File.read("/usr/share/dict/words")
-  #   if dictionary.include?(word)
-  #     "#{word.upcase} is a known word"
-  #   else
-  #     "#{word.upcase} is not a known word"
-  #   end
-  # end
 
   def game_check(request_lines)
     if path(request_lines) == "PATH: start_game\n"
+      binding.pry
       game.start_game
       "Good Luck"
     elsif path(request_lines) == "game"
