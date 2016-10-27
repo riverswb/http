@@ -21,7 +21,7 @@ class Http
     @hello_requests = 0
     # @request_lines = []
     # @client = client
-    @server = Server.new
+    # @server = Server.new
   end
 
   # def request
@@ -41,7 +41,7 @@ class Http
   #   end
   # end
 
-  def response(client)
+  def response(client, request_lines)
     # game_response = [game_check(request_lines), game.number]
     response = choose_path(request_lines)
     # binding.pry
@@ -53,6 +53,8 @@ class Http
           "content-length: #{output.length}\r\n\r\n"].join("\r\n")
     client.puts headers
     client.puts output
+    # client.close
+    # Server.new.request
   end
 
 

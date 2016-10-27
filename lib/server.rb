@@ -1,27 +1,29 @@
 require 'socket'
-
+require './lib/http'
 
 class Server
   attr_reader :tcp_server,
               :client,
               :request_count,
-              :request_lines
+              :request_lines,
+              :http
   def initialize
-    @tcp_server = tcp_server
-    @client = client
+    @tcp_server = TCPServer.new(9292)
+    # @client = client
     @request_lines = []
     @request_count = 0
+    @http = Http.new
     # @hello_requests = 0
   end
 
   def request
     loop {
-      @tcp_server = TCPServer.new(9292)
+      # @tcp_server = TCPServer.new(9292)
       client = tcp_server.accept
       get_request(client)
       @request_count += 1
-      response(client)
-      client.close
+      http.response(client, request_lines)
+      # client.close
     }
   end
 
