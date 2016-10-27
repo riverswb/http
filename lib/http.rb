@@ -7,7 +7,6 @@ class Http
               :diagnostics,
               :hello_requests,
               :game,
-              :server,
               :dictionary
   def initialize
     @diagnostics = Diagnostics.new
