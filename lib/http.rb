@@ -1,16 +1,13 @@
 require './lib/diagnostics'
-require './lib/game'
 require './lib/dictionary'
 
 class Http
   attr_reader :request_count,
               :diagnostics,
               :hello_requests,
-              :game,
               :dictionary
   def initialize
     @diagnostics = Diagnostics.new
-    @game = Game.new
     @dictionary = Dictionary.new
     @request_count = 0
     @hello_requests = 0
@@ -51,20 +48,7 @@ class Http
     elsif path(request_lines).include?("word_search")
       word = path(request_lines).split("=")[1]
       dictionary.word_is_in_dictionary(word)
-    elsif path(request_lines).include?("game")
-      game_check(request_lines)
     else "I'm sorry, try again"
     end
   end
-
-  def game_check(request_lines)
-    if path(request_lines) == "PATH: start_game\n"
-      binding.pry
-      game.start_game
-      "Good Luck"
-    elsif path(request_lines) == "game"
-      "Last guess was #{game.last_guess}\n #{game.feedback}"
-    end
-  end
-
 end
