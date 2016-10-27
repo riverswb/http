@@ -5,9 +5,14 @@ require './lib/http'
 require "pry"
 
 class ServerTest < Minitest::Test
+  attr_reader :request_count,
+              :hello_count
+  def setup
+    @request_count = 0
+    @hello_count = 0
+  end
 
   def test_server_status_is_200
-    skip #passes
     response = Faraday.get("http://127.0.0.1:9292/")
 
     assert_equal 200, response.status
@@ -15,13 +20,14 @@ class ServerTest < Minitest::Test
 
   def test_server_prints_hello_world
     skip #passes
+    @hello_count += 1
     response = Faraday.get("http://127.0.0.1:9292/hello")
-    body = "<html><head></head><body>Hello World! (1)</body></html>"
+    body = "<html><head></head><body>Hello World! (#{hello_count})</body></html>"
     assert_equal body, response.body
   end
 
   def test_server_can_tell_if_a_word_is_known
-    skip #passes
+    # skip #passes
     response = Faraday.get("http://127.0.0.1:9292/word_search?param=cat")
     body = "<html><head></head><body>CAT
  is a known word</body></html>"
@@ -29,7 +35,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_server_not_everything_is_in_dictionary
-    skip #passes
+    # skip #passes
     response = Faraday.get("http://127.0.0.1:9292/word_search?param=clearlynotaword")
     body = "<html><head></head><body>CLEARLYNOTAWORD
  is not a known word</body></html>"
@@ -56,7 +62,6 @@ class ServerTest < Minitest::Test
     def test_sever_game_can_generate_a_random_number
       skip
       response = Faraday.get("http://127.0.0.1:9292/start_game/post")
-      binding.pry
       assert_includes (0..100), response.number_generator
     end
 

@@ -6,10 +6,12 @@ class Http
               :diagnostics,
               :hello_requests,
               :game,
-              :server
+              :server,
+              :dictionary
   def initialize
     @diagnostics = Diagnostics.new
     @game = Game.new
+    @dictionary = Dictionary.new
     @request_count = 0
     @hello_requests = 0
   end
@@ -48,7 +50,7 @@ class Http
       exit
     elsif path(request_lines).include?("word_search")
       word = path(request_lines).split("=")[1]
-      word_is_in_dictionary(word)
+      dictionary.word_is_in_dictionary(word)
     elsif path(request_lines).include?("game")
       game_check(request_lines)
     end
@@ -57,14 +59,14 @@ class Http
 
   end
 
-  def word_is_in_dictionary(word)
-    dictionary = File.read("/usr/share/dict/words")
-    if dictionary.include?(word)
-      "#{word.upcase} is a known word"
-    else
-      "#{word.upcase} is not a known word"
-    end
-  end
+  # def word_is_in_dictionary(word)
+  #   dictionary = File.read("/usr/share/dict/words")
+  #   if dictionary.include?(word)
+  #     "#{word.upcase} is a known word"
+  #   else
+  #     "#{word.upcase} is not a known word"
+  #   end
+  # end
 
   def game_check(request_lines)
     if path(request_lines) == "PATH: start_game\n"

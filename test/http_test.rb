@@ -1,40 +1,11 @@
 require 'minitest/autorun'
 require 'minitest/emoji'
 require './lib/http'
+require './lib/dictionary'
 require 'pry'
 
 class HttpTest < Minitest::Test
 
-  def test_word_in_dictionary
-    http = Http.new
-
-    word = "cat"
-    assert_equal "#{word.upcase} is a known word", http.word_is_in_dictionary(word)
-  end
-
-  def test_not_everything_is_in_dictionary
-    http = Http.new
-
-    word = "clearlynotaword"
-    assert_equal "#{word.upcase} is not a known word", http.word_is_in_dictionary(word)
-  end
-#
-#   def test_starts_game_if_path_and_verb_call_for_it
-#     skip
-#     http = Http.new
-#     input = ["POST /startgame HTTP/1.1",
-#                 "Host: 127.0.0.1:9292",
-#                 "Connection: keep-alive",
-#                 "Cache-Control: no-cache",
-#                 "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
-#                 "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
-#                 "Accept: */*",
-#                 "Accept-Encoding: gzip, deflate, sdch, br",
-#                 "Accept-Language: en-US,en;q=0.8"]
-#
-#     assert_output ("Good Luck\n"){http.game_check(input)}
-#   end
-#
   def test_http_exists
     assert Http.new
   end
@@ -141,3 +112,21 @@ Accept: */*
 #
 #
 end
+
+#
+#   def test_starts_game_if_path_and_verb_call_for_it
+#     skip
+#     http = Http.new
+#     input = ["POST /startgame HTTP/1.1",
+#                 "Host: 127.0.0.1:9292",
+#                 "Connection: keep-alive",
+#                 "Cache-Control: no-cache",
+#                 "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+#                 "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
+#                 "Accept: */*",
+#                 "Accept-Encoding: gzip, deflate, sdch, br",
+#                 "Accept-Language: en-US,en;q=0.8"]
+#
+#     assert_output ("Good Luck\n"){http.game_check(input)}
+#   end
+#
