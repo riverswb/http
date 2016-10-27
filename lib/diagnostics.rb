@@ -1,3 +1,4 @@
+require 'pry'
 class Diagnostics
 
   def output_message_verb(input)
@@ -5,6 +6,7 @@ class Diagnostics
   end #=> Verb: GET
 
   def output_message_path(input)
+    # binding.pry
     "Path: #{input[0].split(" ")[1]}\n"
   end #=> Path: /
 
@@ -28,4 +30,15 @@ class Diagnostics
     "#{input[6]}\n"
   end #=> Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
 
+  def full_output_message(request_lines)
+    "<pre>\n" +
+    output_message_verb(request_lines) +
+    output_message_path(request_lines) +
+    output_message_protocol(request_lines) +
+    output_message_host(request_lines) +
+    output_message_port(request_lines) +
+    output_message_origin(request_lines) +
+    output_message_accept(request_lines) +
+    "</pre>"
+  end
 end
