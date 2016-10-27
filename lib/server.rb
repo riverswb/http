@@ -11,7 +11,7 @@ class Server
     @tcp_server = TCPServer.new(9292)
     # @client = client
     @request_lines = []
-    @request_count = 0
+    # @request_count = 0
     @http = Http.new
     # @hello_requests = 0
   end
@@ -21,9 +21,9 @@ class Server
       # @tcp_server = TCPServer.new(9292)
       client = tcp_server.accept
       get_request(client)
-      @request_count += 1
+      # @request_count += 1
       http.response(client, request_lines)
-      # client.close
+      client.close
     }
   end
 

@@ -37,7 +37,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_server_starts_game
-    # skip #passes
+    skip #passes
     response = Faraday.get("http://127.0.0.1:9292/start_game/post")
     body = "<html><head></head><body>Good Luck</body></html>"
 

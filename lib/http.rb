@@ -16,35 +16,13 @@ class Http
   def initialize
     @diagnostics = Diagnostics.new
     @game = Game.new
-    # @tcp_server = tcp_server
-    # @request_count = 0
+    @request_count = 0
     @hello_requests = 0
-    # @request_lines = []
-    # @client = client
-    # @server = Server.new
   end
 
-  # def request
-  #   loop {
-  #     @tcp_server = TCPServer.new(9292)
-  #     client = tcp_server.accept
-  #     get_request(client)
-  #     @request_count += 1
-  #     response(client)
-  #     client.close
-  #   }
-  # end
-
-  # def get_request(client)
-  #   while line = client.gets and !line.chomp.empty?
-  #     @request_lines << line.chomp
-  #   end
-  # end
-
   def response(client, request_lines)
-    # game_response = [game_check(request_lines), game.number]
+    @request_count += 1
     response = choose_path(request_lines)
-    # binding.pry
     output = "<html><head></head><body>#{response}</body></html>"
     headers = ["http/1.1 200 ok",
           "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
@@ -53,10 +31,7 @@ class Http
           "content-length: #{output.length}\r\n\r\n"].join("\r\n")
     client.puts headers
     client.puts output
-    # client.close
-    # Server.new.request
   end
-
 
   def path(request_lines)
     diagnostics.output_message_path(request_lines)
@@ -67,7 +42,6 @@ class Http
   end
 
   def choose_path(request_lines)
-    # binding.pry
     if path(request_lines) == "Path: /\n"
       diagnostics.full_output_message(request_lines)
     elsif path(request_lines) == "Path: /hello\n"
@@ -107,9 +81,4 @@ class Http
     end
   end
 
-
 end
-
-# if __FILE__ == $0
-#   Http.new.request
-# end
