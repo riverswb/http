@@ -1,14 +1,9 @@
 require 'minitest/autorun'
 require 'minitest/emoji'
-require 'faraday'
-require './lib/http2'
+require './lib/http'
 require 'pry'
 
 class HttpTest < Minitest::Test
-
-
-
-
 
   def test_word_in_dictionary
     http = Http.new
@@ -25,6 +20,7 @@ class HttpTest < Minitest::Test
   end
 
   def test_starts_game_if_path_and_verb_call_for_it
+    skip
     http = Http.new
     input = ["POST /startgame HTTP/1.1",
                 "Host: 127.0.0.1:9292",

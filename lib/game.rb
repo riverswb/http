@@ -3,7 +3,7 @@ class Game
   def initialize
     @guess_count = 0
     @last_guess = 0
-    @number = number
+    @number = 0
   end
 
   def number_generator
@@ -32,6 +32,6 @@ class Game
 
   def start_game
     number_generator
-    puts "Good Luck"
+    "Good Luck"
   end
 end

@@ -1,79 +1,108 @@
-require './lib/diagnostics'
 require 'socket'
+require './lib/diagnostics'
+require './lib/game'
+require 'pry'
 
 class Http
-
-  attr_reader :diagnostics
+  attr_reader :request_count,
+              :tcp_server,
+              :diagnostics,
+              :request_lines,
+              :hello_requests,
+              :game,
+              :client
   def initialize
     @diagnostics = Diagnostics.new
+    @game = Game.new
+    @tcp_server = tcp_server
+    @request_count = 0
+    @hello_requests = 0
+    @request_lines = []
+    @client = client
   end
 
   def request
-    tcp_server = TCPServer.new(9292)
-    client = tcp_server.accept
-
-    puts "Ready for a request"
-    request_lines = []
-    request_count = 0
-    while line = client.gets and !line.chomp.empty?
-      request_lines << line.chomp
-    end
-    # get_request(client, tcp_server, request_lines, request_count)
-    puts "Got this request:"
-    puts request_lines.inspect
-    request_count += 1
-    response(request_lines, request_count, tcp_server, client)
+    loop {
+      @tcp_server = TCPServer.new(9292)
+      client = tcp_server.accept
+      get_request(client)
+      @request_count += 1
+      response(client)
+      client.close
+    }
   end
 
-  def response(input, request_count, tcp_server, client)
-    puts "Sending response"
-    response = "<pre>" + input.join("\n") + "</pre>"
+  def get_request(client)
+    while line = client.gets and !line.chomp.empty?
+      @request_lines << line.chomp
+    end
+  end
+
+  def response(client)
+    # game_response = [game_check(request_lines), game.number]
+    response = choose_path(request_lines)
+    # binding.pry
     output = "<html><head></head><body>#{response}</body></html>"
     headers = ["http/1.1 200 ok",
-              "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
-              "server: ruby",
-              "content-type: text/html; charset=iso-8859-1",
-              "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+          "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+          "server: ruby",
+          "content-type: text/html; charset=iso-8859-1",
+          "content-length: #{output.length}\r\n\r\n"].join("\r\n")
     client.puts headers
     client.puts output
+  end
+
+
+  def path(request_lines)
+    diagnostics.output_message_path(request_lines)
+  end
+
+  def verb(request_lines)
+    diagnostics.output_message_verb(request_lines)
+  end
+
+  def choose_path(request_lines)
     # binding.pry
-    client.puts choose_path(input, request_count, client)
-    # client.close
-    # puts "\nResponde complete, exiting."
-    # puts ["Outputting Diagnostics:", body(input)]
-  end
-
-  def body(input)
-    "<pre>\n" +
-      diagnostics.output_message_verb(input) +
-      diagnostics.output_message_path(input) +
-      diagnostics.output_message_protocol(input) +
-      diagnostics.output_message_host(input) +
-      diagnostics.output_message_port(input) +
-      diagnostics.output_message_origin(input) +
-      diagnostics.output_message_accept(input) +
-    "</pre>"
-  end
-
-  def path(input)
-    diagnostics.output_message_path(input)
-  end
-
-  def choose_path(input, request_count, client)
-    # binding.pry
-    hello_requests = 0
-    if path(input) == "Path: /\n"
-      body(input)
-    elsif path(input) == "Path: /hello\n"
-      hello_requests += 1
-      "Hello World! #{hello_requests}"
-    elsif path(input) == "Path: /datetime\n"
+    if path(request_lines) == "Path: /\n"
+      diagnostics.full_output_message(request_lines)
+    elsif path(request_lines) == "Path: /hello\n"
+      @hello_requests += 1
+      "Hello World! (#{hello_requests})"
+    elsif path(request_lines) == "Path: /datetime\n"
       Time.now.strftime('%I:%M%p on %A, %B %e, %Y')
-    elsif path(input) == "Path: /shutdown\n"
+    elsif path(request_lines) == "Path: /shutdown\n"
       p "Total Requests: #{request_count}"
-      client.close
+      tcp_server.accept.close
+    elsif path(request_lines).include?("word_search")
+      word = path(request_lines).split("=")[1]
+      word_is_in_dictionary(word)
+    elsif path(request_lines).include?("game")
+      game_check(request_lines)
+    end
+
+
+
+  end
+
+  def word_is_in_dictionary(word)
+    dictionary = File.read("/usr/share/dict/words")
+    if dictionary.include?(word)
+      "#{word.upcase} is a known word"
+    else
+      "#{word.upcase} is not a known word"
     end
   end
+
+  def game_check(request_lines)
+    if path(request_lines) == "PATH: start_game\n"
+      game.start_game
+      "Good Luck"
+    elsif path(request_lines) == "game"
+      "Last guess was #{game.last_guess}\n #{game.feedback}"
+    end
+  end
+
+
 end
 
 if __FILE__ == $0
