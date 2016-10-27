@@ -1,6 +1,7 @@
 require 'socket'
 require './lib/diagnostics'
 require './lib/game'
+require './lib/server'
 require 'pry'
 
 class Http
@@ -10,33 +11,35 @@ class Http
               :request_lines,
               :hello_requests,
               :game,
-              :client
+              :client,
+              :server
   def initialize
     @diagnostics = Diagnostics.new
     @game = Game.new
-    @tcp_server = tcp_server
-    @request_count = 0
+    # @tcp_server = tcp_server
+    # @request_count = 0
     @hello_requests = 0
-    @request_lines = []
-    @client = client
+    # @request_lines = []
+    # @client = client
+    @server = Server.new
   end
 
-  def request
-    loop {
-      @tcp_server = TCPServer.new(9292)
-      client = tcp_server.accept
-      get_request(client)
-      @request_count += 1
-      response(client)
-      client.close
-    }
-  end
+  # def request
+  #   loop {
+  #     @tcp_server = TCPServer.new(9292)
+  #     client = tcp_server.accept
+  #     get_request(client)
+  #     @request_count += 1
+  #     response(client)
+  #     client.close
+  #   }
+  # end
 
-  def get_request(client)
-    while line = client.gets and !line.chomp.empty?
-      @request_lines << line.chomp
-    end
-  end
+  # def get_request(client)
+  #   while line = client.gets and !line.chomp.empty?
+  #     @request_lines << line.chomp
+  #   end
+  # end
 
   def response(client)
     # game_response = [game_check(request_lines), game.number]
@@ -105,6 +108,6 @@ class Http
 
 end
 
-if __FILE__ == $0
-  Http.new.request
-end
+# if __FILE__ == $0
+#   Http.new.request
+# end
