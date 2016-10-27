@@ -1,4 +1,3 @@
-require 'pry'
 class Diagnostics
 
   def output_message_verb(input)

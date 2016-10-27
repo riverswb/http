@@ -1,17 +1,11 @@
-require 'socket'
 require './lib/diagnostics'
 require './lib/game'
-require './lib/server'
-require 'pry'
 
 class Http
   attr_reader :request_count,
-              :tcp_server,
               :diagnostics,
-              :request_lines,
               :hello_requests,
               :game,
-              :client,
               :server
   def initialize
     @diagnostics = Diagnostics.new
@@ -51,7 +45,7 @@ class Http
       Time.now.strftime('%I:%M%p on %A, %B %e, %Y')
     elsif path(request_lines) == "Path: /shutdown\n"
       p "Total Requests: #{request_count}"
-      tcp_server.accept.close
+      exit
     elsif path(request_lines).include?("word_search")
       word = path(request_lines).split("=")[1]
       word_is_in_dictionary(word)
