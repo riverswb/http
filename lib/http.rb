@@ -36,19 +36,39 @@ class Http
 
   def choose_path(request_lines)
     if path(request_lines) == "Path: /\n"
-      diagnostics.full_output_message(request_lines)
+      path_root(request_lines)
     elsif path(request_lines) == "Path: /hello\n"
-      @hello_requests += 1
-      "Hello World! (#{hello_requests})"
+      path_hello(request_lines)
     elsif path(request_lines) == "Path: /datetime\n"
-      Time.now.strftime('%I:%M%p on %A, %B %e, %Y')
+      path_time(request_lines)
     elsif path(request_lines) == "Path: /shutdown\n"
-      p "Total Requests: #{request_count}"
-      exit
+      path_shutdown(request_lines)
     elsif path(request_lines).include?("word_search")
-      word = path(request_lines).split("=")[1]
-      dictionary.word_is_in_dictionary(word)
+      path_dictionary(request_lines)
     else "I'm sorry, try again"
     end
+  end
+
+  def path_root(request_lines)
+    diagnostics.full_output_message(request_lines)
+  end
+
+  def path_hello(request_lines)
+    @hello_requests += 1
+    "Hello World! (#{hello_requests})"
+  end
+
+  def path_time(request_lines)
+    Time.now.strftime('%I:%M%p on %A, %B %e, %Y')
+  end
+
+  def path_shutdown(request_lines)
+    p "Total Requests: #{request_count}"
+    exit
+  end
+
+  def path_dictionary(request_lines)
+    word = path(request_lines).split("=")[1]
+    dictionary.word_is_in_dictionary(word)
   end
 end
