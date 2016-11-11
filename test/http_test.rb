@@ -1,8 +1,4 @@
-require 'minitest/autorun'
-require 'minitest/emoji'
-require './lib/http'
-require './lib/dictionary'
-require 'pry'
+require './test/test_helper'
 
 class HttpTest < Minitest::Test
 

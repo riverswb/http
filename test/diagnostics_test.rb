@@ -1,6 +1,4 @@
-require 'minitest/autorun'
-require 'minitest/pride'
-require './lib/diagnostics'
+require './test/test_helper'
 
 class DiagnosticsTest < Minitest::Test
 

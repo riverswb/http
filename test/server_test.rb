@@ -1,16 +1,6 @@
-require 'minitest/autorun'
-require 'minitest/pride'
-require 'faraday'
-require './lib/http'
-require "pry"
+require './test/test_helper'
 
 class ServerTest < Minitest::Test
-  attr_reader :request_count,
-              :hello_count
-  def setup
-    @request_count = 0
-    @hello_count = 0
-  end
 
   def test_server_status_is_200
     response = Faraday.get("http://127.0.0.1:9292/")
@@ -19,9 +9,8 @@ class ServerTest < Minitest::Test
   end
 
   def test_server_prints_hello_world
-    @hello_count += 1
     response = Faraday.get("http://127.0.0.1:9292/hello")
-    body = "<html><body>Hello World! (#{hello_count})</body></html>"
+    body = "<html><body>Hello World! (1)</body></html>"
     assert_equal body, response.body
   end
 
