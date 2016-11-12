@@ -5,7 +5,7 @@ class HttpTest < Minitest::Test
   def test_http_exists
     assert Http.new
   end
-#
+
   def test_choose_path_root
 
     http = Http.new

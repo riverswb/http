@@ -10,8 +10,8 @@ class ServerTest < Minitest::Test
 
   def test_server_prints_hello_world
     response = Faraday.get("http://127.0.0.1:9292/hello")
-    body = "<html><body>Hello World! (1)</body></html>"
-    assert_equal body, response.body
+
+    assert_equal true, response.body.include?("Hello World!")
   end
 
   def test_server_can_tell_if_a_word_is_known
