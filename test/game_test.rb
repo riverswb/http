@@ -106,4 +106,8 @@ class GameTest < Minitest::Test
     output = "Please make guesses as a whole number, between 0 and 100"
     assert_equal output, game.set_guess("pizza")
   end
+
+  def test_can_send_a_guess_in_through_request
+
+  end
 end

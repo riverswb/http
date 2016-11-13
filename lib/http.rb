@@ -49,9 +49,9 @@ class Http
   def post_paths(request_lines)
     if path(request_lines) == "Path: /start_game\n"
       path_game
-    elsif path(request_lines) == "Path: /game\n"
-
-
+    elsif path(request_lines).include?("/game")
+      guess = path(request_lines).split('=')[1].to_i
+      game.set_guess(guess)
     end
   end
 
