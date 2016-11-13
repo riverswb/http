@@ -1,22 +1,25 @@
 require './lib/diagnostics'
 require './lib/dictionary'
+require './lib/game'
 
 class Http
   attr_reader :request_count,
               :diagnostics,
               :hello_requests,
-              :dictionary
+              :dictionary,
+              :game
   def initialize
     @diagnostics = Diagnostics.new
     @dictionary = Dictionary.new
+    # @game = Game.new
     @request_count = 0
     @hello_requests = 0
   end
 
   def response(client, request_lines)
     @request_count += 1
-    response = choose_path(request_lines)
-    output = "<html><body>#{response}</body></html>"
+    response = check_verb(request_lines)
+    output = "<html><body>" + %Q(#{response}) + "</body></html>"
     headers = ["http/1.1 200 ok",
           "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
           "server: ruby",
@@ -34,6 +37,22 @@ class Http
     diagnostics.output_message_verb(request_lines)
   end
 
+  def check_verb(request_lines)
+    # binding.pry
+    if diagnostics.output_message_verb(request_lines) == "VERB: GET\n"
+      choose_path(request_lines)
+    elsif diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
+      post_paths(request_lines)
+    else "Check your verb, please"
+    end
+  end
+
+  def post_paths(request_lines)
+    if path(request_lines) == "Path: /start_game\n"
+      path_game
+    end
+  end
+
   def choose_path(request_lines)
     if path(request_lines) == "Path: /\n"
       path_root(request_lines)
@@ -47,6 +66,11 @@ class Http
       path_dictionary(request_lines)
     else "I'm sorry, try again"
     end
+  end
+
+  def path_game
+    @game = Game.new
+    "Good Luck!"
   end
 
   def path_root(request_lines)
