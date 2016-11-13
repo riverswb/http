@@ -38,7 +38,6 @@ class Http
   end
 
   def check_verb(request_lines)
-    # binding.pry
     if diagnostics.output_message_verb(request_lines) == "VERB: GET\n"
       choose_path(request_lines)
     elsif diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
@@ -50,6 +49,9 @@ class Http
   def post_paths(request_lines)
     if path(request_lines) == "Path: /start_game\n"
       path_game
+    elsif path(request_lines) == "Path: /game\n"
+
+
     end
   end
 
@@ -64,8 +66,14 @@ class Http
       path_shutdown(request_lines)
     elsif path(request_lines).include?("word_search")
       path_dictionary(request_lines)
+    elsif path(request_lines) == "Path: /game\n"
+      game_information
     else "I'm sorry, try again"
     end
+  end
+
+  def game_information
+    "You have made #{game.guess_count} guesses\n #{game.hint}"
   end
 
   def path_game
