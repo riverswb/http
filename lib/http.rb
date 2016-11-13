@@ -11,7 +11,6 @@ class Http
   def initialize
     @diagnostics = Diagnostics.new
     @dictionary = Dictionary.new
-    # @game = Game.new
     @request_count = 0
     @hello_requests = 0
   end
@@ -20,13 +19,19 @@ class Http
     @request_count += 1
     response = check_verb(request_lines)
     output = "<html><body>" + %Q(#{response}) + "</body></html>"
-    client.puts headers(output) unless diagnostics.output_message_verb(request_lines) == "VERB: POST\n" && path(request_lines).include?("/game")
-    client.puts redirect_headers(output) if diagnostics.output_message_verb(request_lines) == "VERB: POST\n" && path(request_lines).include?("/game")
+    client.puts headers(output) if game_post_request?(request_lines)
+    client.puts redirect_headers(output) if game_post_request?(request_lines)
     client.puts output
   end
 
+  def game_post_request?(request_lines)
+    if diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
+      path(request_lines).include?("/game")
+    end
+  end
+
   def redirect_headers(output)
-    ["http/1.1 302 Moved",
+    ["http/1.1 302 Moved Permanetly",
       "Location: http://127.0.0.1:9292/game",
       "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
       "server: ruby",
@@ -65,7 +70,6 @@ class Http
     elsif path(request_lines).include?("/game")
       guess = path(request_lines).split('=')[1].to_i
       game.set_guess(guess)
-
     end
   end
 

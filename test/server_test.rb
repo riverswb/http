@@ -38,5 +38,10 @@ class ServerTest < Minitest::Test
     assert_equal 200, response.status
   end
 
-
+  def test_when_you_make_a_guess_it_redirects_to_get_game
+    response = Faraday.post("http://127.0.0.1:9292/gameguess=101")
+    response_2 = Faraday.get("http://127.0.0.1:9292/game")
+    assert_equal 302, response.status
+    assert response_2.body.include?("Too high")
+  end
 end
