@@ -20,13 +20,26 @@ class Http
     @request_count += 1
     response = check_verb(request_lines)
     output = "<html><body>" + %Q(#{response}) + "</body></html>"
-    headers = ["http/1.1 200 ok",
+    client.puts headers(output) unless diagnostics.output_message_verb(request_lines) == "VERB: POST\n" && path(request_lines).include?("/game")
+    client.puts redirect_headers(output) if diagnostics.output_message_verb(request_lines) == "VERB: POST\n" && path(request_lines).include?("/game")
+    client.puts output
+  end
+
+  def redirect_headers(output)
+    ["http/1.1 302 Moved",
+      "Location: http://127.0.0.1:9292/game",
+      "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+      "server: ruby",
+      "content-type: text/html; charset=iso-8859-1",
+      "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+  end
+
+  def headers(output)
+    ["http/1.1 200 ok",
           "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
           "server: ruby",
           "content-type: text/html; charset=iso-8859-1",
           "content-length: #{output.length}\r\n\r\n"].join("\r\n")
-    client.puts headers
-    client.puts output
   end
 
   def path(request_lines)
@@ -52,6 +65,7 @@ class Http
     elsif path(request_lines).include?("/game")
       guess = path(request_lines).split('=')[1].to_i
       game.set_guess(guess)
+
     end
   end
 

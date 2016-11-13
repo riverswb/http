@@ -12,6 +12,7 @@ class ServerTest < Minitest::Test
     response = Faraday.get("http://127.0.0.1:9292/hello")
 
     assert_equal true, response.body.include?("Hello World!")
+    assert_equal 200, response.status
   end
 
   def test_server_can_tell_if_a_word_is_known
@@ -19,6 +20,7 @@ class ServerTest < Minitest::Test
     body = "<html><body>CAT
  is a known word</body></html>"
     assert_equal body, response.body
+    assert_equal 200, response.status
   end
 
   def test_server_not_everything_is_in_dictionary
@@ -26,5 +28,15 @@ class ServerTest < Minitest::Test
     body = "<html><body>CLEARLYNOTAWORD
  is not a known word</body></html>"
     assert_equal body, response.body
+    assert_equal 200, response.status
   end
+
+  def test_path_is_start_game
+    response = Faraday.post("http://127.0.0.1:9292/start_game")
+    output = "<html><body>Good Luck!</body></html>"
+    assert_equal output, response.body
+    assert_equal 200, response.status
+  end
+
+
 end
