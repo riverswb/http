@@ -1,11 +1,13 @@
 require './lib/diagnostics'
 require './lib/dictionary'
+require './lib/game'
 
 class Http
   attr_reader :request_count,
               :diagnostics,
               :hello_requests,
-              :dictionary
+              :dictionary,
+              :game
   def initialize
     @diagnostics = Diagnostics.new
     @dictionary = Dictionary.new
@@ -15,15 +17,34 @@ class Http
 
   def response(client, request_lines)
     @request_count += 1
-    response = choose_path(request_lines)
-    output = "<html><body>#{response}</body></html>"
-    headers = ["http/1.1 200 ok",
+    response = check_verb(request_lines)
+    output = "<html><body>" + %Q(#{response}) + "</body></html>"
+    client.puts headers(output) if game_post_request?(request_lines)
+    client.puts redirect_headers(output) if game_post_request?(request_lines)
+    client.puts output
+  end
+
+  def game_post_request?(request_lines)
+    if diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
+      path(request_lines).include?("/game")
+    end
+  end
+
+  def redirect_headers(output)
+    ["http/1.1 302 Moved Permanetly",
+      "Location: http://127.0.0.1:9292/game",
+      "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+      "server: ruby",
+      "content-type: text/html; charset=iso-8859-1",
+      "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+  end
+
+  def headers(output)
+    ["http/1.1 200 ok",
           "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
           "server: ruby",
           "content-type: text/html; charset=iso-8859-1",
           "content-length: #{output.length}\r\n\r\n"].join("\r\n")
-    client.puts headers
-    client.puts output
   end
 
   def path(request_lines)
@@ -32,6 +53,24 @@ class Http
 
   def verb(request_lines)
     diagnostics.output_message_verb(request_lines)
+  end
+
+  def check_verb(request_lines)
+    if diagnostics.output_message_verb(request_lines) == "VERB: GET\n"
+      choose_path(request_lines)
+    elsif diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
+      post_paths(request_lines)
+    else "Check your verb, please"
+    end
+  end
+
+  def post_paths(request_lines)
+    if path(request_lines) == "Path: /start_game\n"
+      path_game
+    elsif path(request_lines).include?("/game")
+      guess = path(request_lines).split('=')[1].to_i
+      game.set_guess(guess)
+    end
   end
 
   def choose_path(request_lines)
@@ -45,8 +84,19 @@ class Http
       path_shutdown(request_lines)
     elsif path(request_lines).include?("word_search")
       path_dictionary(request_lines)
+    elsif path(request_lines) == "Path: /game\n"
+      game_information
     else "I'm sorry, try again"
     end
+  end
+
+  def game_information
+    "You have made #{game.guess_count} guesses\n #{game.hint}"
+  end
+
+  def path_game
+    @game = Game.new
+    "Good Luck!"
   end
 
   def path_root(request_lines)
