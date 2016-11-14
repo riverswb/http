@@ -47,20 +47,15 @@ i_suck_and_my_tests_are_order_dependent!()
     refute response_2.body.include?("Too low")
   end
 
-  def test_redirects_if_a_game_is_in_progress
+  def test_redirects_403_if_a_game_is_in_progress
     Faraday.post("http://127.0.0.1:9292/start_game")
     response = Faraday.post("http://127.0.0.1:9292/start_game")
     assert_equal 403, response.status
   end
 
-  # def test_http_chooses_status_codes_based_on_request_start_game
-  #   http = Http.new
-  #   response = Faraday.post("http://127.0.0.1:9292/start_game")
-  #   assert_equal 301, response.status
-  #
-  # end
-  #
-  # def test_if_start_game_request_made_when_game_running_respond_with_403
-  #
-  # end
+  def test_responds_with_404_if_unknown_path
+    skip
+    response = Faraday.post("http://127.0.0.1:9292/fofamalou")
+    assert_equal 404, response.status
+  end
 end

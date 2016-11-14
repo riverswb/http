@@ -20,7 +20,7 @@ class Http
     @request_count += 1
     response = check_verb(request_lines)
     output = "<html><body>" + %Q(#{response}) + "</body></html>"
-    client.puts headers(output) if !game_post_request?(request_lines)
+    client.puts headers(output) if !game_post_request?(request_lines) && unknown_path(request_lines)
     client.puts redirect_headers(output, request_lines) if game_post_request?(request_lines)
     client.puts output
   end
@@ -46,16 +46,25 @@ class Http
   end
 
   def status_codes(request_lines)
-    if path(request_lines).include?("start_game") && game.game_running == false
+    if !unknown_path(request_lines)
+      "404 Not Found"
+    elsif path(request_lines).include?("start_game") && game.game_running == false
       game.start_game
       return "301 Moved Permanetly"
     elsif diagnostics.output_message_verb(request_lines).include?("POST") && path(request_lines).include?("/game")
       "301 Moved Permanetly"
     elsif path(request_lines).include?("start_game") && game.game_running == true
       "403 Forbidden"
-      
     end
   end
+
+  def unknown_path(request_lines)
+    known_paths.any? {|known| path(request_lines).include?(known)}
+  end
+
+  def known_paths
+    ["/\n", "/hello\n", "/game\n", "/datetime\n", "/shutdown\n", "/word_search"]
+    end
 
   def headers(output)
     ["http/1.1 200 ok",
@@ -95,6 +104,7 @@ class Http
       end
     end
   end
+
 
   def choose_path(request_lines)
     if path(request_lines) == "Path: /\n"
