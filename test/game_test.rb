@@ -4,11 +4,11 @@ require './lib/http'
 require 'pry'
 
 class GameTest < Minitest::Test
-  attr_reader :start_game, :http, :game
+  attr_reader :start_game, :http, :game, :start_input
   def setup
     @game = Game.new
     @http = Http.new
-    start_input = ["POST /start_game HTTP/1.1",
+    @start_input = ["POST /start_game HTTP/1.1",
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
@@ -119,9 +119,11 @@ class GameTest < Minitest::Test
   end
 
   def test_can_start_a_game_from_http
-    skip
-    refute game.game_running
-    start_game
-    assert game.game_running
+    http = Http.new
+    refute http.game.game_running
+
+    http.check_verb(start_input)
+
+    assert http.game.game_running
   end
 end
