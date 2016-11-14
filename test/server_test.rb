@@ -54,7 +54,6 @@ i_suck_and_my_tests_are_order_dependent!()
   end
 
   def test_responds_with_404_if_unknown_path
-    skip
     response = Faraday.post("http://127.0.0.1:9292/fofamalou")
     assert_equal 404, response.status
   end
