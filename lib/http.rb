@@ -11,6 +11,7 @@ class Http
   def initialize
     @diagnostics = Diagnostics.new
     @dictionary = Dictionary.new
+    @game = Game.new
     @request_count = 0
     @hello_requests = 0
   end
@@ -19,8 +20,11 @@ class Http
     @request_count += 1
     response = check_verb(request_lines)
     output = "<html><body>" + %Q(#{response}) + "</body></html>"
-    client.puts headers(output) if game_post_request?(request_lines)
-    client.puts redirect_headers(output) if game_post_request?(request_lines)
+    if !game_post_request?(request_lines)
+      client.puts headers(output)
+    elsif game_post_request?(request_lines)
+      client.puts redirect_headers(output)
+    end
     client.puts output
   end
 
@@ -95,7 +99,7 @@ class Http
   end
 
   def path_game
-    @game = Game.new
+    # @game = Game.new
     "Good Luck!"
   end
 
