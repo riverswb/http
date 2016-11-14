@@ -117,10 +117,18 @@ Accept: */*
     assert_equal output, http.choose_path(input)
   end
 
-  # def test_http_chooses_status_codes_based_on_request_start_game
-  #   http = Http.new
-  #   client = TCPServer.new(9292).accept
-  #
-  #   assert_equal 301, http.response(client, start_input).status
-  # end
+  def test_if_verb_is_not_get_or_post_it_tells_you
+    http = Http.new
+    input = ["DELETE / HTTP/1.1",
+            "Host: 127.0.0.1:9292",
+            "Connection: keep-alive",
+            "Cache-Control: no-cache",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
+            "Accept: */*",
+            "Accept-Encoding: gzip, deflate, sdch, br",
+            "Accept-Language: en-US,en;q=0.8"]
+    output = "Check your verb, please"
+    assert_equal output, http.check_verb(input)
+  end
 end

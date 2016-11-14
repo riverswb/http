@@ -104,7 +104,7 @@ class Http
         guess = path(request_lines).split('=')[1].to_i
         game.set_guess(guess)
       else
-        "Start a game"
+        "Start a game by using the path /start_game"
       end
     end
   end
@@ -122,16 +122,16 @@ class Http
     elsif path(request_lines).include?("word_search")
       path_dictionary(request_lines)
     elsif path(request_lines) == "Path: /game\n"
-      if game
         game_information
-      else "Start a game first!"
-      end
     else "I'm sorry, try again"
     end
   end
 
   def game_information
-    "You have made #{game.guess_count} guesses\n #{game.hint}"
+    if game
+      "You have made #{game.guess_count} guesses\n #{game.hint}"
+    else "Start a game first!"
+    end
   end
 
   def path_game
