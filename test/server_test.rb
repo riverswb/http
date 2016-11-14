@@ -62,4 +62,9 @@ i_suck_and_my_tests_are_order_dependent!()
     response = Faraday.post("http://127.0.0.1:9292/force_error")
     assert_equal 500, response.status
   end
+
+  # def test_force_error_responds_ith_500
+  #   response = Faraday.get("http://127.0.0.1:9292/force_error")
+  #   assert_equal 500, response.status
+  # end
 end

@@ -17,11 +17,21 @@ class Http
 
   def response(client, request_lines)
     @request_count += 1
-    response = check_verb(request_lines)
+    # response = check_verb(request_lines)
+    response = response_build(request_lines)
     output = "<html><body>" + %Q(#{response}) + "</body></html>"
     client.puts headers(output) if !game_post_request?(request_lines) && known_path(path(request_lines)) && !force_error(request_lines)
     client.puts redirect_headers(output, request_lines) if game_post_request?(request_lines) || !known_path(path(request_lines)) || force_error(request_lines)
     client.puts output
+  end
+
+  def response_build(request_lines)
+    if force_error(request_lines)
+      #Raise exception and use caller.join(/r/n) to putput stack
+      "#{caller.join("/r/n")}"
+    else
+      check_verb(request_lines)
+    end
   end
 
   def game_post_request?(request_lines)
@@ -55,6 +65,7 @@ class Http
       "403 Forbidden"
     elsif path(request_lines).include?("/force_error")
       "500 Internal Source Error"
+      # response = "#{caller.join("\r\n")}"
     end
   end
 
@@ -68,7 +79,7 @@ class Http
 
   def known_paths
     ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n", "/word_search", "/start_game", "/force_error"]
-    end
+  end
 
   def headers(output)
     ["http/1.1 200 ok",
@@ -129,7 +140,7 @@ class Http
 
   def game_information
     if game
-      "You have made #{game.guess_count} guesses\n #{game.hint}"
+      "You have made #{game.guess_count} guesses \n #{game.hint}"
     else "Start a game first!"
     end
   end

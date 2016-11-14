@@ -66,7 +66,7 @@ class GameTest < Minitest::Test
             "Accept-Encoding: gzip, deflate, sdch, br",
             "Accept-Language: en-US,en;q=0.8"]
 
-    output = "You have made 0 guesses\n Hint: Make a guess first"
+    output = "You have made 0 guesses \n Hint: Make a guess first"
     assert_equal output, http.check_verb(input)
   end
 
