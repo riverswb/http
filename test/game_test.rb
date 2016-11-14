@@ -120,10 +120,9 @@ class GameTest < Minitest::Test
 
   def test_can_start_a_game_from_http
     http = Http.new
+    http.path_game
     refute http.game.game_running
-
     http.check_verb(start_input)
-
     assert http.game.game_running
   end
 end

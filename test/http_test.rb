@@ -2,6 +2,21 @@ require './test/test_helper'
 
 class HttpTest < Minitest::Test
 
+  attr_reader :start_input
+  def setup
+    @start_input = ["POST /start_game HTTP/1.1",
+            "Host: 127.0.0.1:9292",
+            "Connection: keep-alive",
+            "Cache-Control: no-cache",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+              AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+              Safari/537.36",
+            "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
+            "Accept: */*",
+            "Accept-Encoding: gzip, deflate, sdch, br",
+            "Accept-Language: en-US,en;q=0.8"]
+  end
+
   def test_http_exists
     assert Http.new
   end
@@ -101,4 +116,11 @@ Accept: */*
 
     assert_equal output, http.choose_path(input)
   end
+
+  # def test_http_chooses_status_codes_based_on_request_start_game
+  #   http = Http.new
+  #   client = TCPServer.new(9292).accept
+  #
+  #   assert_equal 301, http.response(client, start_input).status
+  # end
 end
