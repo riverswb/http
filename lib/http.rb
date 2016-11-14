@@ -11,7 +11,6 @@ class Http
   def initialize
     @diagnostics = Diagnostics.new
     @dictionary = Dictionary.new
-    # @game = Game.new
     @request_count = 0
     @hello_requests = 0
   end
@@ -20,15 +19,14 @@ class Http
     @request_count += 1
     response = check_verb(request_lines)
     output = "<html><body>" + %Q(#{response}) + "</body></html>"
-    client.puts headers(output) if !game_post_request?(request_lines) && known_path(path(request_lines))
-    client.puts redirect_headers(output, request_lines) if game_post_request?(request_lines) || !known_path(path(request_lines))
+    client.puts headers(output) if !game_post_request?(request_lines) && known_path(path(request_lines)) && !force_error(request_lines)
+    client.puts redirect_headers(output, request_lines) if game_post_request?(request_lines) || !known_path(path(request_lines)) || force_error(request_lines)
     client.puts output
   end
 
   def game_post_request?(request_lines)
     if diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
       if path(request_lines).include?("start_game")
-        # game.game_running = true
         true
       elsif path(request_lines).include?("/game")
         true
@@ -55,7 +53,13 @@ class Http
       "301 Moved Permanetly"
     elsif path(request_lines).include?("start_game") && game.game_running == true
       "403 Forbidden"
+    elsif path(request_lines).include?("/force_error")
+      "500 Internal Source Error"
     end
+  end
+
+  def force_error(request_lines)
+    path(request_lines).include?("/force_error")
   end
 
   def known_path(path)
@@ -63,7 +67,7 @@ class Http
   end
 
   def known_paths
-    ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n", "/word_search", "/start_game"]
+    ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n", "/word_search", "/start_game", "/force_error"]
     end
 
   def headers(output)
