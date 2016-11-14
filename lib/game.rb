@@ -1,9 +1,17 @@
 class Game
-  attr_reader :number, :guess_count, :guess
+  attr_reader :number,
+              :guess_count,
+              :guess,
+              :game_running
   def initialize
     @number = rand(100)
     @guess_count = 0
     @guess = guess
+    @game_running = false
+  end
+
+  def start_game
+    @game_running = true
   end
 
   def set_guess(input)

@@ -11,6 +11,7 @@ class Http
   def initialize
     @diagnostics = Diagnostics.new
     @dictionary = Dictionary.new
+    @game = Game.new
     @request_count = 0
     @hello_requests = 0
   end
@@ -95,7 +96,6 @@ class Http
   end
 
   def path_game
-    @game = Game.new
     "Good Luck!"
   end
 

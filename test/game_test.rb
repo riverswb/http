@@ -1,6 +1,7 @@
 require './test/test_helper'
 require './lib/game'
 require './lib/http'
+require 'pry'
 
 class GameTest < Minitest::Test
   attr_reader :start_game, :http, :game
@@ -107,7 +108,20 @@ class GameTest < Minitest::Test
     assert_equal output, game.set_guess("pizza")
   end
 
-  def test_can_send_a_guess_in_through_request
+  def test_game_is_not_running_by_default
+    refute game.game_running
+  end
 
+  def test_game_can_be_set_to_running
+    game.start_game
+
+    assert game.game_running
+  end
+
+  def test_can_start_a_game_from_http
+    skip
+    refute game.game_running
+    start_game
+    assert game.game_running
   end
 end
