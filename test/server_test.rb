@@ -1,4 +1,5 @@
 require './test/test_helper'
+require 'faraday'
 
 class ServerTest < Minitest::Test
 
