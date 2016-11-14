@@ -20,16 +20,15 @@ class Http
     @request_count += 1
     response = check_verb(request_lines)
     output = "<html><body>" + %Q(#{response}) + "</body></html>"
-    # if game_post_request?(request_lines)
+    if !game_post_request?(request_lines)
       client.puts headers(output)
-    # elsif game_post_request?(request_lines)
-    #   client.puts redirect_headers(output)
-    # end
+    elsif game_post_request?(request_lines)
+      client.puts redirect_headers(output)
+    end
     client.puts output
   end
 
   def game_post_request?(request_lines)
-    # binding.pry
     if diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
       path(request_lines).include?("/game")
     end
