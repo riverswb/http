@@ -58,6 +58,7 @@ i_suck_and_my_tests_are_order_dependent!()
   def test_responds_with_404_if_unknown_path
     response = Faraday.post("http://127.0.0.1:9292/fofamalou")
     assert_equal 404, response.status
+    assert response.body.include?("404 Not Found")
   end
 
   def test_force_error_responds_with_500_and_the_stack

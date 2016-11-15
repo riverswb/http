@@ -194,4 +194,142 @@ Accept: */*
 
     assert_equal "404 Not Found", http.response_build(input)
   end
+
+  def test_force_error_checker_returns_true_if_request_is_force_error
+    http = Http.new
+    input = ["POST /force_error HTTP/1.1",
+            "Host: 127.0.0.1:9292",
+            "Connection: keep-alive",
+            "Cache-Control: no-cache",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
+            "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
+            "Accept: */*",
+            "Accept-Encoding: gzip, deflate, sdch, br",
+            "Accept-Language: en-US,en;q=0.8"]
+
+    assert http.force_error?(input)
+  end
+
+  def test_known_path_returns_true_if_path_is_known_false_if_not_known
+    http = Http.new
+    input = "Path: /\n"
+    input_2 = "Path: /sarge"
+
+    assert http.known_path(input)
+    refute http.known_path(input_2)
+  end
+
+  def test_path_returns_path_when_given_request
+    http = Http.new
+    input = ["POST /force_error HTTP/1.1",
+            "Host: 127.0.0.1:9292",
+            "Connection: keep-alive",
+            "Cache-Control: no-cache",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
+            "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
+            "Accept: */*",
+            "Accept-Encoding: gzip, deflate, sdch, br",
+            "Accept-Language: en-US,en;q=0.8"]
+
+    assert http.path(input).include?("force_error")
+  end
+
+  def test_verb_returns_verb_when_given_request
+    http = Http.new
+    input = ["POST /force_error HTTP/1.1",
+            "Host: 127.0.0.1:9292",
+            "Connection: keep-alive",
+            "Cache-Control: no-cache",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
+            "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
+            "Accept: */*",
+            "Accept-Encoding: gzip, deflate, sdch, br",
+            "Accept-Language: en-US,en;q=0.8"]
+
+    assert http.verb(input).include?("POST")
+  end
+
+  def test_path_game_returns_true_if_request_is_a_game_request
+    http = Http.new
+    input = ["POST /game HTTP/1.1",
+            "Host: 127.0.0.1:9292",
+            "Connection: keep-alive",
+            "Cache-Control: no-cache",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
+            "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
+            "Accept: */*",
+            "Accept-Encoding: gzip, deflate, sdch, br",
+            "Accept-Language: en-US,en;q=0.8"]
+
+    assert http.path_game?(input)
+  end
+
+  def test_path_game_returns_false_if_request_is_not_a_game_request
+    http = Http.new
+    input = ["POST /start_game HTTP/1.1",
+            "Host: 127.0.0.1:9292",
+            "Connection: keep-alive",
+            "Cache-Control: no-cache",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
+            "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
+            "Accept: */*",
+            "Accept-Encoding: gzip, deflate, sdch, br",
+            "Accept-Language: en-US,en;q=0.8"]
+
+    refute http.path_game?(input)
+  end
+
+  def test_verb_post_returns_true_if_request_verb_is_post
+    http = Http.new
+    input = ["POST /start_game HTTP/1.1",
+            "Host: 127.0.0.1:9292",
+            "Connection: keep-alive",
+            "Cache-Control: no-cache",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
+            "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
+            "Accept: */*",
+            "Accept-Encoding: gzip, deflate, sdch, br",
+            "Accept-Language: en-US,en;q=0.8"]
+
+    assert http.verb_post?(input)
+  end
+
+  def test_verb_post_returns_false_if_request_verb_is_not_a_post
+    http = Http.new
+    input = ["GET /start_game HTTP/1.1",
+            "Host: 127.0.0.1:9292",
+            "Connection: keep-alive",
+            "Cache-Control: no-cache",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
+            "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
+            "Accept: */*",
+            "Accept-Encoding: gzip, deflate, sdch, br",
+            "Accept-Language: en-US,en;q=0.8"]
+
+    refute http.verb_post?(input)
+  end
+
+  def test_game_running_returns_true_if_game_is_running_false_if_not_running
+    http = Http.new
+
+    refute http.game_running?
+
+    http.game.start_game
+
+    assert http.game_running?
+  end
 end

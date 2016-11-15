@@ -63,30 +63,36 @@ class Http
       "server: ruby",
       "content-type: text/html; charset=iso-8859-1",
       "content-length: #{output.length}\r\n\r\n"].join("\r\n")
-    end
+  end
 
   def response_build(request_lines)
     if force_error?(request_lines)
-        "500 Internal Source Error, Stack: #{caller.join("/n")}"
+      force_error_response
     elsif path_start_game?(request_lines)
+      start_response(request_lines)
+    elsif !known_path(path(request_lines))
+      status_404
+    else check_verb(request_lines)
+    end
+  end
+
+  def force_error_response
+    "500 Internal Source Error, Stack: #{caller.join("/n")}"
+  end
+
+  def start_response(request_lines)
+    if path_start_game?(request_lines)
       @start_counter += 1
       if start_counter <= 1
         "Good Luck!"
-      else
-        "403 Forbidden"
+      else status_403
       end
-    elsif !known_path(path(request_lines))
-      "404 Not Found"
-    else
-      check_verb(request_lines)
     end
   end
 
   def game_post_request?(request_lines)
     if verb_post?(request_lines)
-      if path(request_lines).include?("game")
-        true
-      end
+      true if path(request_lines).include?("game")
     end
   end
 
@@ -107,7 +113,7 @@ class Http
   end
 
   def status_500
-  "500 Internal Source Error"
+    "500 Internal Source Error"
   end
 
   def status_301
@@ -145,12 +151,9 @@ class Http
   end
 
   def known_path(path)
-    known_paths.any? {|known| path.include?(known)}
-  end
-
-  def known_paths
-    ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n", "/word_search",
-     "/start_game", "/force_error"]
+    known = ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n",
+             "/word_search", "/start_game", "/force_error"]
+    known.any? {|known| path.include?(known)}
   end
 
   def headers(output)
@@ -193,11 +196,10 @@ class Http
     if path_start_game?(request_lines)
       "Good Luck!"
     elsif path_game?(request_lines)
-        guess = path(request_lines).split('=')[1].to_i
-        game.set_guess(guess)
+      guess = path(request_lines).split('=')[1].to_i
+      game.set_guess(guess)
     end
   end
-
 
   def choose_path(request_lines)
     if path(request_lines) == "Path: /\n"
@@ -210,14 +212,14 @@ class Http
       path_shutdown(request_lines)
     elsif path(request_lines).include?("word_search")
       path_dictionary(request_lines)
-    elsif path(request_lines) == "Path: /game\n"
-        game_information
+    elsif path_game?(request_lines)
+      game_information
     else "I'm sorry, try again"
     end
   end
 
   def game_information
-      "You have made #{game.guess_count} guesses \n #{game.hint}"
+    "You have made #{game.guess_count} guesses \n #{game.hint}"
   end
 
   def path_root(request_lines)
