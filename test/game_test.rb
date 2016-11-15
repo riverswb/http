@@ -117,4 +117,17 @@ class GameTest < Minitest::Test
 
     assert game.game_running
   end
+
+  def test_game_only_accepts_fixnum_guesses
+    input_1 = game.set_guess("dog")
+    input_2 = game.set_guess("1")
+    input_3 = game.set_guess(["1"])
+    input_4 = game.set_guess(4)
+    output = "Please make guesses as a whole number, between 0 and 100"
+
+    assert_equal output, input_1
+    assert_equal output, input_2
+    assert_equal output, input_3
+    assert_equal game.guess, input_4
+  end
 end
