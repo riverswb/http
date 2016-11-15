@@ -163,7 +163,6 @@ Accept: */*
   end
 
   def test_response_build_responds_with_404_if_unknown_path_sarge
-    # skip
     http = Http.new
     input = ["POST /sarge HTTP/1.1",
             "Host: 127.0.0.1:9292",
