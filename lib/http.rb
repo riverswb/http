@@ -20,15 +20,18 @@ class Http
 
   def response(client, request_lines)
     @request_count += 1
-    response = response_build(request_lines)
-    output = "<html><body>" + %Q(#{response}) + "</body></html>"
     type = get_type(request_lines)
+    response = response_build(request_lines)
+    output = "<html><body>" + "#{response}" + "</body></html>"
+    select_header(request_lines, output, type, client)
+    client.puts output
+  end
+
+  def select_header(request_lines, output, type, client)
     if headers?(request_lines)
       client.puts headers(output)
-    else
-      client.puts redirect_headers(output, request_lines, type)
+    else client.puts redirect_headers(output, request_lines, type)
     end
-    client.puts output
   end
 
   def headers?(request_lines)
@@ -42,12 +45,12 @@ class Http
   end
 
   def get_type(request_lines)
-    if  verb_post?(request_lines) && path(request_lines).include?("/start_game")
+    if  verb_post?(request_lines) && path_start_game?(request_lines)
       if game.game_running == false
         "start_game"
       else "game"
       end
-    elsif verb(request_lines).include?("POST") && path(request_lines).include?("/game")
+  elsif verb_post?(request_lines) && path_game?(request_lines)
       "game"
     else
       nil
@@ -66,7 +69,7 @@ class Http
   def response_build(request_lines)
     if force_error(request_lines)
         "500 Internal Source Error, Stack: #{caller.join("/n")}"
-    elsif path(request_lines).include?("start_game")
+    elsif path_start_game?(request_lines)
       @start_counter += 1
       if start_counter <= 1
         "Good Luck!"
@@ -82,9 +85,9 @@ class Http
 
   def game_post_request?(request_lines)
     if diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
-      if path(request_lines).include?("start_game")
+      if path_start_game?(request_lines)
         true
-      elsif path(request_lines).include?("/game")
+      elsif path_game?(request_lines)
         true
       end
     end
@@ -94,16 +97,20 @@ class Http
   def status_codes(request_lines)
     if !known_path(path(request_lines))
       "404 Not Found"
-    elsif path(request_lines).include?("start_game") && !game_running?
+    elsif path_start_game?(request_lines) && !game_running?
       game.start_game
       return "301 Moved Permanetly"
-    elsif verb(request_lines).include?("POST") && path(request_lines).include?("/game")
-      "301 Moved Permanetly"
-    elsif path(request_lines).include?("start_game") && game.game_running == true
+    elsif path_start_game?(request_lines) && game_running?
       "403 Forbidden"
+    elsif verb_post?(request_lines) && path_game?(request_lines)
+      "301 Moved Permanetly"
     elsif path(request_lines).include?("/force_error")
       "500 Internal Source Error"
     end
+  end
+
+  def path_start_game?(request_lines)
+    path(request_lines).include?("start_game")
   end
 
   def game_running?
@@ -125,7 +132,8 @@ class Http
   end
 
   def known_paths
-    ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n", "/word_search", "/start_game", "/force_error"]
+    ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n", "/word_search",
+     "/start_game", "/force_error"]
   end
 
   def headers(output)
@@ -142,6 +150,10 @@ class Http
 
   def verb(request_lines)
     diagnostics.output_message_verb(request_lines)
+  end
+
+  def path_game?(request_lines)
+    path(request_lines).include?("/game")
   end
 
   def check_verb(request_lines)
@@ -163,7 +175,7 @@ class Http
   def post_paths(request_lines)
     if path(request_lines) == "Path: /start_game\n"
       "Good Luck!"
-    elsif path(request_lines).include?("/game")
+    elsif path_game?(request_lines)
         guess = path(request_lines).split('=')[1].to_i
         game.set_guess(guess)
     end
