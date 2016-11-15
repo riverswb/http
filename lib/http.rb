@@ -9,6 +9,7 @@ class Http
               :dictionary,
               :game,
               :start_counter
+
   def initialize
     @diagnostics = Diagnostics.new
     @dictionary = Dictionary.new
@@ -37,7 +38,7 @@ class Http
   def headers?(request_lines)
     if !game_post_request?(request_lines)
       if known_path(path(request_lines))
-        if !force_error(request_lines)
+        if !force_error?(request_lines)
           true
         end
       end
@@ -46,14 +47,12 @@ class Http
 
   def get_type(request_lines)
     if  verb_post?(request_lines) && path_start_game?(request_lines)
-      if game.game_running == false
+      if !game_running?
         "start_game"
       else "game"
       end
   elsif verb_post?(request_lines) && path_game?(request_lines)
       "game"
-    else
-      nil
     end
   end
 
@@ -67,7 +66,7 @@ class Http
     end
 
   def response_build(request_lines)
-    if force_error(request_lines)
+    if force_error?(request_lines)
         "500 Internal Source Error, Stack: #{caller.join("/n")}"
     elsif path_start_game?(request_lines)
       @start_counter += 1
@@ -84,10 +83,8 @@ class Http
   end
 
   def game_post_request?(request_lines)
-    if diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
-      if path_start_game?(request_lines)
-        true
-      elsif path_game?(request_lines)
+    if verb_post?(request_lines)
+      if path(request_lines).include?("game")
         true
       end
     end
@@ -96,17 +93,37 @@ class Http
 
   def status_codes(request_lines)
     if !known_path(path(request_lines))
-      "404 Not Found"
+      status_404
     elsif path_start_game?(request_lines) && !game_running?
       game.start_game
-      return "301 Moved Permanetly"
+      status_302
     elsif path_start_game?(request_lines) && game_running?
-      "403 Forbidden"
+      status_403
     elsif verb_post?(request_lines) && path_game?(request_lines)
-      "301 Moved Permanetly"
-    elsif path(request_lines).include?("/force_error")
-      "500 Internal Source Error"
+      status_301
+    elsif force_error?(request_lines)
+      status_500
     end
+  end
+
+  def status_500
+  "500 Internal Source Error"
+  end
+
+  def status_301
+    "301 Moved Permanetly"
+  end
+
+  def status_403
+    "403 Forbidden"
+  end
+
+  def status_302
+    "302 Redirect"
+  end
+
+  def status_404
+    "404 Not Found"
   end
 
   def path_start_game?(request_lines)
@@ -117,7 +134,7 @@ class Http
     game.game_running
   end
 
-  def force_error(request_lines)
+  def force_error?(request_lines)
     if path(request_lines).include?("/force_error")
       begin
       raise Exception
@@ -173,7 +190,7 @@ class Http
   end
 
   def post_paths(request_lines)
-    if path(request_lines) == "Path: /start_game\n"
+    if path_start_game?(request_lines)
       "Good Luck!"
     elsif path_game?(request_lines)
         guess = path(request_lines).split('=')[1].to_i
@@ -201,10 +218,6 @@ class Http
 
   def game_information
       "You have made #{game.guess_count} guesses \n #{game.hint}"
-  end
-
-  def path_game
-    @game
   end
 
   def path_root(request_lines)
