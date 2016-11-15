@@ -23,9 +23,22 @@ class Http
     response = response_build(request_lines)
     output = "<html><body>" + %Q(#{response}) + "</body></html>"
     type = get_type(request_lines)
-    client.puts headers(output) if !game_post_request?(request_lines) && known_path(path(request_lines)) && !force_error(request_lines)
-    client.puts redirect_headers(output, request_lines, type) if game_post_request?(request_lines) || !known_path(path(request_lines)) || force_error(request_lines)
+    if headers?(request_lines)
+      client.puts headers(output)
+    else
+      client.puts redirect_headers(output, request_lines, type)
+    end
     client.puts output
+  end
+
+  def headers?(request_lines)
+    if !game_post_request?(request_lines)
+      if known_path(path(request_lines))
+        if !force_error(request_lines)
+          true
+        end
+      end
+    end
   end
 
   def get_type(request_lines)
