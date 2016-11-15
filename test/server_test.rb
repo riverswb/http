@@ -50,7 +50,9 @@ i_suck_and_my_tests_are_order_dependent!()
   def test_redirects_403_if_a_game_is_in_progress
     Faraday.post("http://127.0.0.1:9292/start_game")
     response = Faraday.post("http://127.0.0.1:9292/start_game")
+    output = "<html><body>403 Forbidden</body></html>"
     assert_equal 403, response.status
+    assert_equal output, response.body
   end
 
   def test_responds_with_404_if_unknown_path

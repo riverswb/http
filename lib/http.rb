@@ -7,28 +7,62 @@ class Http
               :diagnostics,
               :hello_requests,
               :dictionary,
-              :game
+              :game,
+              :start_counter
   def initialize
     @diagnostics = Diagnostics.new
     @dictionary = Dictionary.new
+    @game = Game.new
     @request_count = 0
     @hello_requests = 0
+    @start_counter = -1
   end
 
   def response(client, request_lines)
     @request_count += 1
-    # response = check_verb(request_lines)
     response = response_build(request_lines)
     output = "<html><body>" + %Q(#{response}) + "</body></html>"
+    type = get_type(request_lines)
     client.puts headers(output) if !game_post_request?(request_lines) && known_path(path(request_lines)) && !force_error(request_lines)
-    client.puts redirect_headers(output, request_lines) if game_post_request?(request_lines) || !known_path(path(request_lines)) || force_error(request_lines)
+    client.puts redirect_headers(output, request_lines, type) if game_post_request?(request_lines) || !known_path(path(request_lines)) || force_error(request_lines)
     client.puts output
   end
 
+  def get_type(request_lines)
+    if  verb(request_lines).include?("POST") && path(request_lines).include?("/start_game")
+      if game.game_running == false
+        "start_game"
+      else "game"
+      end
+    elsif verb(request_lines).include?("POST") && path(request_lines).include?("/game")
+      "game"
+    else
+      nil
+    end
+  end
+
+  def redirect_headers(output,request_lines, type)
+    ["http/1.1 #{status_codes(request_lines)}",
+      # "Location: http://127.0.0.1:9292/game",
+      "Location: http://127.0.0.1:9292/" + "#{type}",
+      "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+      "server: ruby",
+      "content-type: text/html; charset=iso-8859-1",
+      "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+    end
+
   def response_build(request_lines)
     if force_error(request_lines)
-      #Raise exception and use caller.join(/r/n) to putput stack
-      "#{caller.join("/r/n")}"
+        "500 Internal Source Error, Stack: #{caller.join("/n")}"
+    elsif path(request_lines).include?("start_game")
+      @start_counter += 1
+      if start_counter <= 1
+        "Good Luck!"
+      else
+        "403 Forbidden"
+      end
+    # elsif !known_path(request_lines)
+    #   "404 Not Found"
     else
       check_verb(request_lines)
     end
@@ -44,14 +78,6 @@ class Http
     end
   end
 
-  def redirect_headers(output,request_lines)
-    ["http/1.1 #{status_codes(request_lines)}",
-      "Location: http://127.0.0.1:9292/game",
-      "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
-      "server: ruby",
-      "content-type: text/html; charset=iso-8859-1",
-      "content-length: #{output.length}\r\n\r\n"].join("\r\n")
-  end
 
   def status_codes(request_lines)
     if !known_path(path(request_lines))
@@ -65,11 +91,16 @@ class Http
       "403 Forbidden"
     elsif path(request_lines).include?("/force_error")
       "500 Internal Source Error"
-      # response = "#{caller.join("\r\n")}"
     end
   end
 
   def force_error(request_lines)
+    if path(request_lines).include?("/force_error")
+      begin
+      raise Exception
+      rescue Exception
+      end
+    end
     path(request_lines).include?("/force_error")
   end
 
@@ -83,10 +114,10 @@ class Http
 
   def headers(output)
     ["http/1.1 200 ok",
-          "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
-          "server: ruby",
-          "content-type: text/html; charset=iso-8859-1",
-          "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+     "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+     "server: ruby",
+     "content-type: text/html; charset=iso-8859-1",
+     "content-length: #{output.length}\r\n\r\n"].join("\r\n")
   end
 
   def path(request_lines)
@@ -108,7 +139,6 @@ class Http
 
   def post_paths(request_lines)
     if path(request_lines) == "Path: /start_game\n"
-      path_game if game.nil?
       "Good Luck!"
     elsif path(request_lines).include?("/game")
       if game
@@ -146,7 +176,7 @@ class Http
   end
 
   def path_game
-    @game = Game.new
+    @game
   end
 
   def path_root(request_lines)
