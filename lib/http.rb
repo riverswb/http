@@ -7,48 +7,117 @@ class Http
               :diagnostics,
               :hello_requests,
               :dictionary,
-              :game
+              :game,
+              :start_counter
   def initialize
     @diagnostics = Diagnostics.new
     @dictionary = Dictionary.new
     @game = Game.new
     @request_count = 0
     @hello_requests = 0
+    @start_counter = -1
   end
 
   def response(client, request_lines)
     @request_count += 1
-    response = check_verb(request_lines)
+    response = response_build(request_lines)
     output = "<html><body>" + %Q(#{response}) + "</body></html>"
-    if !game_post_request?(request_lines)
-      client.puts headers(output)
-    elsif game_post_request?(request_lines)
-      client.puts redirect_headers(output)
-    end
+    type = get_type(request_lines)
+    client.puts headers(output) if !game_post_request?(request_lines) && known_path(path(request_lines)) && !force_error(request_lines)
+    client.puts redirect_headers(output, request_lines, type) if game_post_request?(request_lines) || !known_path(path(request_lines)) || force_error(request_lines)
     client.puts output
   end
 
-  def game_post_request?(request_lines)
-    if diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
-      path(request_lines).include?("/game")
+  def get_type(request_lines)
+    if  verb(request_lines).include?("POST") && path(request_lines).include?("/start_game")
+      if game.game_running == false
+        "start_game"
+      else "game"
+      end
+    elsif verb(request_lines).include?("POST") && path(request_lines).include?("/game")
+      "game"
+    else
+      nil
     end
   end
 
-  def redirect_headers(output)
-    ["http/1.1 302 Moved Permanetly",
-      "Location: http://127.0.0.1:9292/game",
+  def redirect_headers(output,request_lines, type)
+    ["http/1.1 #{status_codes(request_lines)}",
+      # "Location: http://127.0.0.1:9292/game",
+      "Location: http://127.0.0.1:9292/" + "#{type}",
       "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
       "server: ruby",
       "content-type: text/html; charset=iso-8859-1",
       "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+    end
+
+  def response_build(request_lines)
+    if force_error(request_lines)
+        "500 Internal Source Error, Stack: #{caller.join("/n")}"
+    elsif path(request_lines).include?("start_game")
+      @start_counter += 1
+      if start_counter <= 1
+        "Good Luck!"
+      else
+        "403 Forbidden"
+      end
+    elsif !known_path(path(request_lines))
+      "404 Not Found"
+    else
+      check_verb(request_lines)
+    end
+  end
+
+  def game_post_request?(request_lines)
+    if diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
+      if path(request_lines).include?("start_game")
+        true
+      elsif path(request_lines).include?("/game")
+        true
+      end
+    end
+  end
+
+
+  def status_codes(request_lines)
+    if !known_path(path(request_lines))
+      "404 Not Found"
+    elsif path(request_lines).include?("start_game") && game.game_running == false
+      game.start_game
+      return "301 Moved Permanetly"
+    elsif diagnostics.output_message_verb(request_lines).include?("POST") && path(request_lines).include?("/game")
+      "301 Moved Permanetly"
+    elsif path(request_lines).include?("start_game") && game.game_running == true
+      "403 Forbidden"
+    elsif path(request_lines).include?("/force_error")
+      "500 Internal Source Error"
+    end
+  end
+
+  def force_error(request_lines)
+    if path(request_lines).include?("/force_error")
+      begin
+      raise Exception
+      rescue Exception
+      end
+    end
+    path(request_lines).include?("/force_error")
+  end
+
+  def known_path(path)
+    known_paths.any? {|known| path.include?(known)}
+  end
+
+  def known_paths
+    ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n", "/word_search", "/start_game", "/force_error"]
   end
 
   def headers(output)
     ["http/1.1 200 ok",
-          "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
-          "server: ruby",
-          "content-type: text/html; charset=iso-8859-1",
-          "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+     "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+     "server: ruby",
+     "content-type: text/html; charset=iso-8859-1",
+     "content-length: #{output.length}\r\n\r\n"].join("\r\n")
   end
 
   def path(request_lines)
@@ -70,12 +139,17 @@ class Http
 
   def post_paths(request_lines)
     if path(request_lines) == "Path: /start_game\n"
-      path_game
+      "Good Luck!"
     elsif path(request_lines).include?("/game")
-      guess = path(request_lines).split('=')[1].to_i
-      game.set_guess(guess)
+      if game
+        guess = path(request_lines).split('=')[1].to_i
+        game.set_guess(guess)
+      else
+        "Start a game by using the path /start_game"
+      end
     end
   end
+
 
   def choose_path(request_lines)
     if path(request_lines) == "Path: /\n"
@@ -89,18 +163,20 @@ class Http
     elsif path(request_lines).include?("word_search")
       path_dictionary(request_lines)
     elsif path(request_lines) == "Path: /game\n"
-      game_information
+        game_information
     else "I'm sorry, try again"
     end
   end
 
   def game_information
-    "You have made #{game.guess_count} guesses\n #{game.hint}"
+    if game
+      "You have made #{game.guess_count} guesses \n #{game.hint}"
+    else "Start a game first!"
+    end
   end
 
   def path_game
-    # @game = Game.new
-    "Good Luck!"
+    @game
   end
 
   def path_root(request_lines)

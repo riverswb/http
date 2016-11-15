@@ -1,13 +1,14 @@
 require './test/test_helper'
 require './lib/game'
 require './lib/http'
+require 'pry'
 
 class GameTest < Minitest::Test
-  attr_reader :start_game, :http, :game
+  attr_reader :start_game, :http, :game, :start_input
   def setup
     @game = Game.new
     @http = Http.new
-    start_input = ["POST /start_game HTTP/1.1",
+    @start_input = ["POST /start_game HTTP/1.1",
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
@@ -65,7 +66,7 @@ class GameTest < Minitest::Test
             "Accept-Encoding: gzip, deflate, sdch, br",
             "Accept-Language: en-US,en;q=0.8"]
 
-    output = "You have made 0 guesses\n Hint: Make a guess first"
+    output = "You have made 0 guesses \n Hint: Make a guess first"
     assert_equal output, http.check_verb(input)
   end
 
@@ -107,7 +108,13 @@ class GameTest < Minitest::Test
     assert_equal output, game.set_guess("pizza")
   end
 
-  def test_can_send_a_guess_in_through_request
+  def test_game_is_not_running_by_default
+    refute game.game_running
+  end
 
+  def test_game_can_be_set_to_running
+    game.start_game
+
+    assert game.game_running
   end
 end
