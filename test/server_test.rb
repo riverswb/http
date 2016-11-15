@@ -36,7 +36,7 @@ i_suck_and_my_tests_are_order_dependent!()
     response = Faraday.post("http://127.0.0.1:9292/start_game")
     output = "<html><body>Good Luck!</body></html>"
     assert_equal output, response.body
-    assert_equal 301, response.status
+    assert_equal 302, response.status
   end
 
   def test_when_you_make_a_guess_it_redirects_to_get_game
@@ -60,13 +60,9 @@ i_suck_and_my_tests_are_order_dependent!()
     assert_equal 404, response.status
   end
 
-  def test_force_error_responds_ith_500
+  def test_force_error_responds_with_500_and_the_stack
     response = Faraday.post("http://127.0.0.1:9292/force_error")
     assert_equal 500, response.status
+    assert response.body.include?("Stack:")
   end
-
-  # def test_force_error_responds_ith_500
-  #   response = Faraday.get("http://127.0.0.1:9292/force_error")
-  #   assert_equal 500, response.status
-  # end
 end

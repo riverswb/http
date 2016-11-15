@@ -28,7 +28,9 @@ class HttpTest < Minitest::Test
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
             "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
             "Accept: */*",
             "Accept-Encoding: gzip, deflate, sdch, br",
@@ -54,7 +56,9 @@ Accept: */*
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
             "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
             "Accept: */*",
             "Accept-Encoding: gzip, deflate, sdch, br",
@@ -71,7 +75,9 @@ Accept: */*
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
             "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
             "Accept: */*",
             "Accept-Encoding: gzip, deflate, sdch, br",
@@ -88,7 +94,9 @@ Accept: */*
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
             "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
             "Accept: */*",
             "Accept-Encoding: gzip, deflate, sdch, br",
@@ -106,7 +114,9 @@ Accept: */*
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
             "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
             "Accept: */*",
             "Accept-Encoding: gzip, deflate, sdch, br",
@@ -123,7 +133,9 @@ Accept: */*
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
             "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
             "Accept: */*",
             "Accept-Encoding: gzip, deflate, sdch, br",
@@ -138,7 +150,9 @@ Accept: */*
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
             "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
             "Accept: */*",
             "Accept-Encoding: gzip, deflate, sdch, br",
@@ -153,7 +167,9 @@ Accept: */*
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
             "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
             "Accept: */*",
             "Accept-Encoding: gzip, deflate, sdch, br",
@@ -168,7 +184,9 @@ Accept: */*
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1)
+             AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71
+             Safari/537.36",
             "Postman-Token: 22f6e411-c3a5-b02c-d7b9-cf45ccd1b180",
             "Accept: */*",
             "Accept-Encoding: gzip, deflate, sdch, br",

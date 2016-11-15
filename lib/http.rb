@@ -9,6 +9,7 @@ class Http
               :dictionary,
               :game,
               :start_counter
+
   def initialize
     @diagnostics = Diagnostics.new
     @dictionary = Dictionary.new
@@ -20,30 +21,43 @@ class Http
 
   def response(client, request_lines)
     @request_count += 1
-    response = response_build(request_lines)
-    output = "<html><body>" + %Q(#{response}) + "</body></html>"
     type = get_type(request_lines)
-    client.puts headers(output) if !game_post_request?(request_lines) && known_path(path(request_lines)) && !force_error(request_lines)
-    client.puts redirect_headers(output, request_lines, type) if game_post_request?(request_lines) || !known_path(path(request_lines)) || force_error(request_lines)
+    response = response_build(request_lines)
+    output = "<html><body>" + "#{response}" + "</body></html>"
+    select_header(request_lines, output, type, client)
     client.puts output
   end
 
+  def select_header(request_lines, output, type, client)
+    if headers?(request_lines)
+      client.puts headers(output)
+    else client.puts redirect_headers(output, request_lines, type)
+    end
+  end
+
+  def headers?(request_lines)
+    if !game_post_request?(request_lines)
+      if known_path(path(request_lines))
+        if !force_error?(request_lines)
+          true
+        end
+      end
+    end
+  end
+
   def get_type(request_lines)
-    if  verb(request_lines).include?("POST") && path(request_lines).include?("/start_game")
-      if game.game_running == false
+    if  verb_post?(request_lines) && path_start_game?(request_lines)
+      if !game_running?
         "start_game"
       else "game"
       end
-    elsif verb(request_lines).include?("POST") && path(request_lines).include?("/game")
+  elsif verb_post?(request_lines) && path_game?(request_lines)
       "game"
-    else
-      nil
     end
   end
 
   def redirect_headers(output,request_lines, type)
     ["http/1.1 #{status_codes(request_lines)}",
-      # "Location: http://127.0.0.1:9292/game",
       "Location: http://127.0.0.1:9292/" + "#{type}",
       "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
       "server: ruby",
@@ -52,9 +66,9 @@ class Http
     end
 
   def response_build(request_lines)
-    if force_error(request_lines)
+    if force_error?(request_lines)
         "500 Internal Source Error, Stack: #{caller.join("/n")}"
-    elsif path(request_lines).include?("start_game")
+    elsif path_start_game?(request_lines)
       @start_counter += 1
       if start_counter <= 1
         "Good Luck!"
@@ -69,10 +83,8 @@ class Http
   end
 
   def game_post_request?(request_lines)
-    if diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
-      if path(request_lines).include?("start_game")
-        true
-      elsif path(request_lines).include?("/game")
+    if verb_post?(request_lines)
+      if path(request_lines).include?("game")
         true
       end
     end
@@ -81,20 +93,48 @@ class Http
 
   def status_codes(request_lines)
     if !known_path(path(request_lines))
-      "404 Not Found"
-    elsif path(request_lines).include?("start_game") && game.game_running == false
+      status_404
+    elsif path_start_game?(request_lines) && !game_running?
       game.start_game
-      return "301 Moved Permanetly"
-    elsif diagnostics.output_message_verb(request_lines).include?("POST") && path(request_lines).include?("/game")
-      "301 Moved Permanetly"
-    elsif path(request_lines).include?("start_game") && game.game_running == true
-      "403 Forbidden"
-    elsif path(request_lines).include?("/force_error")
-      "500 Internal Source Error"
+      status_302
+    elsif path_start_game?(request_lines) && game_running?
+      status_403
+    elsif verb_post?(request_lines) && path_game?(request_lines)
+      status_301
+    elsif force_error?(request_lines)
+      status_500
     end
   end
 
-  def force_error(request_lines)
+  def status_500
+  "500 Internal Source Error"
+  end
+
+  def status_301
+    "301 Moved Permanetly"
+  end
+
+  def status_403
+    "403 Forbidden"
+  end
+
+  def status_302
+    "302 Redirect"
+  end
+
+  def status_404
+    "404 Not Found"
+  end
+
+  def path_start_game?(request_lines)
+    path(request_lines).include?("start_game")
+  end
+
+  def game_running?
+    game.game_running
+  end
+
+  def force_error?(request_lines)
     if path(request_lines).include?("/force_error")
       begin
       raise Exception
@@ -109,7 +149,8 @@ class Http
   end
 
   def known_paths
-    ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n", "/word_search", "/start_game", "/force_error"]
+    ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n", "/word_search",
+     "/start_game", "/force_error"]
   end
 
   def headers(output)
@@ -128,25 +169,32 @@ class Http
     diagnostics.output_message_verb(request_lines)
   end
 
+  def path_game?(request_lines)
+    path(request_lines).include?("/game")
+  end
+
   def check_verb(request_lines)
-    if diagnostics.output_message_verb(request_lines) == "VERB: GET\n"
+    if verb_get?(request_lines)
       choose_path(request_lines)
-    elsif diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
+  elsif verb_post?(request_lines)
       post_paths(request_lines)
     else "Check your verb, please"
     end
   end
 
+  def verb_post?(request_lines)
+    diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
+  end
+  def verb_get?(request_lines)
+    diagnostics.output_message_verb(request_lines) == "VERB: GET\n"
+  end
+
   def post_paths(request_lines)
-    if path(request_lines) == "Path: /start_game\n"
+    if path_start_game?(request_lines)
       "Good Luck!"
-    elsif path(request_lines).include?("/game")
-      if game
+    elsif path_game?(request_lines)
         guess = path(request_lines).split('=')[1].to_i
         game.set_guess(guess)
-      else
-        "Start a game by using the path /start_game"
-      end
     end
   end
 
@@ -169,14 +217,7 @@ class Http
   end
 
   def game_information
-    if game
       "You have made #{game.guess_count} guesses \n #{game.hint}"
-    else "Start a game first!"
-    end
-  end
-
-  def path_game
-    @game
   end
 
   def path_root(request_lines)
