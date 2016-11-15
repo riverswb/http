@@ -72,8 +72,7 @@ class Http
       start_response(request_lines)
     elsif !known_path(path(request_lines))
       status_404
-    else
-      check_verb(request_lines)
+    else check_verb(request_lines)
     end
   end
 
@@ -86,17 +85,14 @@ class Http
       @start_counter += 1
       if start_counter <= 1
         "Good Luck!"
-      else
-        status_403
+      else status_403
       end
     end
   end
 
   def game_post_request?(request_lines)
     if verb_post?(request_lines)
-      if path(request_lines).include?("game")
-        true
-      end
+      true if path(request_lines).include?("game")
     end
   end
 
@@ -155,12 +151,9 @@ class Http
   end
 
   def known_path(path)
-    known_paths.any? {|known| path.include?(known)}
-  end
-
-  def known_paths
-    ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n", "/word_search",
-     "/start_game", "/force_error"]
+    known = ["/\n", "/hello\n", "/game", "/datetime\n", "/shutdown\n",
+             "/word_search", "/start_game", "/force_error"]
+    known.any? {|known| path.include?(known)}
   end
 
   def headers(output)
@@ -226,7 +219,7 @@ class Http
   end
 
   def game_information
-      "You have made #{game.guess_count} guesses \n #{game.hint}"
+    "You have made #{game.guess_count} guesses \n #{game.hint}"
   end
 
   def path_root(request_lines)
