@@ -29,7 +29,7 @@ class Http
   end
 
   def get_type(request_lines)
-    if  verb(request_lines).include?("POST") && path(request_lines).include?("/start_game")
+    if  verb_post?(request_lines) && path(request_lines).include?("/start_game")
       if game.game_running == false
         "start_game"
       else "game"
@@ -43,7 +43,6 @@ class Http
 
   def redirect_headers(output,request_lines, type)
     ["http/1.1 #{status_codes(request_lines)}",
-      # "Location: http://127.0.0.1:9292/game",
       "Location: http://127.0.0.1:9292/" + "#{type}",
       "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
       "server: ruby",
@@ -82,16 +81,20 @@ class Http
   def status_codes(request_lines)
     if !known_path(path(request_lines))
       "404 Not Found"
-    elsif path(request_lines).include?("start_game") && game.game_running == false
+    elsif path(request_lines).include?("start_game") && !game_running?
       game.start_game
       return "301 Moved Permanetly"
-    elsif diagnostics.output_message_verb(request_lines).include?("POST") && path(request_lines).include?("/game")
+    elsif verb(request_lines).include?("POST") && path(request_lines).include?("/game")
       "301 Moved Permanetly"
     elsif path(request_lines).include?("start_game") && game.game_running == true
       "403 Forbidden"
     elsif path(request_lines).include?("/force_error")
       "500 Internal Source Error"
     end
+  end
+
+  def game_running?
+    game.game_running
   end
 
   def force_error(request_lines)
@@ -129,24 +132,27 @@ class Http
   end
 
   def check_verb(request_lines)
-    if diagnostics.output_message_verb(request_lines) == "VERB: GET\n"
+    if verb_get?(request_lines)
       choose_path(request_lines)
-    elsif diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
+  elsif verb_post?(request_lines)
       post_paths(request_lines)
     else "Check your verb, please"
     end
+  end
+
+  def verb_post?(request_lines)
+    diagnostics.output_message_verb(request_lines) == "VERB: POST\n"
+  end
+  def verb_get?(request_lines)
+    diagnostics.output_message_verb(request_lines) == "VERB: GET\n"
   end
 
   def post_paths(request_lines)
     if path(request_lines) == "Path: /start_game\n"
       "Good Luck!"
     elsif path(request_lines).include?("/game")
-      if game
         guess = path(request_lines).split('=')[1].to_i
         game.set_guess(guess)
-      else
-        "Start a game by using the path /start_game"
-      end
     end
   end
 
@@ -169,10 +175,7 @@ class Http
   end
 
   def game_information
-    if game
       "You have made #{game.guess_count} guesses \n #{game.hint}"
-    else "Start a game first!"
-    end
   end
 
   def path_game
