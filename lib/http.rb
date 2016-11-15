@@ -61,8 +61,8 @@ class Http
       else
         "403 Forbidden"
       end
-    # elsif !known_path(request_lines)
-    #   "404 Not Found"
+    elsif !known_path(path(request_lines))
+      "404 Not Found"
     else
       check_verb(request_lines)
     end

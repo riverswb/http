@@ -162,10 +162,10 @@ Accept: */*
     assert_equal "start_game", http.get_type(input)
   end
 
-  def test_response_build_responds_with_404_if_unknown_path
-    skip
+  def test_response_build_responds_with_404_if_unknown_path_sarge
+    # skip
     http = Http.new
-    input = ["POST /unkownn HTTP/1.1",
+    input = ["POST /sarge HTTP/1.1",
             "Host: 127.0.0.1:9292",
             "Connection: keep-alive",
             "Cache-Control: no-cache",
@@ -175,6 +175,6 @@ Accept: */*
             "Accept-Encoding: gzip, deflate, sdch, br",
             "Accept-Language: en-US,en;q=0.8"]
 
-    assert_equal "404 Not Found", http.get_type(input)
+    assert_equal "404 Not Found", http.response_build(input)
   end
 end
